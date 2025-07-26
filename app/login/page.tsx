@@ -32,22 +32,27 @@ export default function LoginPage() {
     }
 
     try {
-      // 서버 연동 전 가짜 로그인 검증
-      doLogin(loginParam).then(data => {
-        console.log("data=>" + JSON.stringify(data));
-        if(data.error) {
-          sweetToast("로그인 정보가 올바르지 않습니다.");
-        }else{
-          dispatch(loginSuccess(data));
+      const data = await doLogin(loginParam);
+      console.log("data =>", JSON.stringify(data));
 
-          //localStorage.setItem("data", data);
+      if (data.error) {
+        sweetToast("로그인 정보가 올바르지 않습니다.");
+        return;
+      }
 
-          sweetToast("로그인 성공");
-          router.push("/");
-        }
-      });
+      // roleNames 확인
+      const roleNames = data.roleNames || [];
+      if (roleNames.length === 1 && roleNames[0] === "USER") {
+        sweetToast("로그인 권한이 없습니다.");
+        return;
+      }
+
+      // 정상 로그인 처리
+      dispatch(loginSuccess(data));
+      sweetToast("로그인 성공");
+      router.push("/");
     } catch (error) {
-      console.log("error=>" + JSON.stringify(error));
+      console.log("error =>", JSON.stringify(error));
       sweetToast("로그인 중 오류가 발생했습니다.");
     }
   };

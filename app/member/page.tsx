@@ -1,9 +1,10 @@
 'use client';
 import useCustomMove from "@/utils/useCustomMove";
-import { getMembers, resetPassword, stopMember, startMember } from '../../api/memberApi';
+import { getDeviceList, startDevice, stopDevice } from '../../api/deviceApi';
 import { Member, MemberListResponse } from '../../types/Member';
 import { useEffect, useState } from "react";
 import AccountRegisterModal from '@/components/AccountRegisterModal';
+import PasswordChangeForm from "@/components/PasswordChangeForm";
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button
@@ -15,9 +16,9 @@ const initState = {
   memberEmail: "",
 };
 
-interface StopParam {
-  memberId: string;
-  cancelReason: string;
+interface userParam {
+  id: string;
+  password: string;
 }
 
 // app/users/page.tsx
@@ -26,6 +27,9 @@ export default function UsersPage() {
       { id: 1, name: '홍길동', email: 'hong@example.com' },
       { id: 2, name: '김철수', email: 'kim@example.com' },
     ];
+
+    const [pwModalOpen, setPwModalOpen] = useState(false);
+    const [selectedLoginId, setSelectedLoginId] = useState<string | null>(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -40,9 +44,9 @@ export default function UsersPage() {
       setSearchParams(prev => ({ ...prev, [name]: value }));
     };
 
-    const loadMembers = async () => {
+    const loadDeviceList = async () => {
       try {
-        const data = await getMembers({ page, size, ...searchParams });
+        const data = await getDeviceList({ page, size, ...searchParams });
         setMembers(data);
       } catch (error) {
         console.log("멤버 데이터를 불러오는 중 에러 발생:", error);
@@ -50,43 +54,24 @@ export default function UsersPage() {
       }
     };
 
-    const handleReset = (memberId: string, email: string) => {
-      sweetConfirm(`${memberId} 회원의 패스워드를 초기화 하시겠습니까?`, 'question', async () => {
-        try {
-          const data = await resetPassword(memberId);
-          console.log(`data => ${JSON.stringify(data)}`);
-    
-          if (data.errorCode === 'notExist') {
-            sweetAlert(data.errorMessage, '', 'info', '닫기');
-            return;
-          }
-    
-          sweetToast(`초기화된 패스워드가 ${email}로 전송되었습니다.`);
-          //router.replace('/musics');
-          //fetchMembers({
-            //page: page,  // 검색은 항상 첫 페이지부터
-            //size,
-            //...searchParams
-          //}).then(setMembers);
-        } catch (error) {
-          console.log("error=>" + JSON.stringify(error));
-          alert("오류가 발생했습니다.");
-        }
-      });
+    const handlePwChange = (memberId: string) => {
+      setSelectedLoginId(memberId);
+      setPwModalOpen(true);
     };
     
-    const handleStop = (memberId: string) => {
+    const handleStop = (deviceId: string) => {
     
-      console.log(`memberId => ${memberId}`);
+      console.log(`deviceId => ${deviceId}`);
     
-      sweetConfirm(`${memberId} 회원을 차단 하시겠습니까?`, 'question', async () => {
-        const param: StopParam = {
-          memberId,
-          cancelReason: '관리자 요청'
-        };
-    
+      sweetConfirm(`${deviceId} 계정을 차단 하시겠습니까?`, 'question', async () => {
+ 
+      const param: userParam = {
+        id: deviceId,
+        password: ''
+      };
+  
         try {
-          const data = await stopMember(param);
+          const data = await stopDevice(param);
           console.log(`data => ${JSON.stringify(data)}`);
     
           if (data.errorCode === 'notExist') {
@@ -94,13 +79,9 @@ export default function UsersPage() {
             return;
           }
     
-          sweetToast('회원이 차단 되었습니다.\n차단된 회원은 음악신청이 불가합니다.');
+          sweetToast('계정이 차단 되었습니다.\n차단된 계정은 음악신청이 불가합니다.');
           //router.replace('/musics');
-          getMembers({
-            page: page,  // 검색은 항상 첫 페이지부터
-            size,
-            ...searchParams
-          }).then(setMembers);
+          loadDeviceList();
         } catch (error) {
           console.log("error=>" + JSON.stringify(error));
           alert("오류가 발생했습니다.");
@@ -108,41 +89,36 @@ export default function UsersPage() {
       });
     };
 
-    const handleResume = (memberId: string) => {
+    const handleResume = (deviceId: string) => {
     
-      console.log(`memberId => ${memberId}`);
+      console.log(`deviceId => ${deviceId}`);
     
-      sweetConfirm(`${memberId} 회원을 사용재개 하시겠습니까?`, 'question', async () => {
-        const param: StopParam = {
-          memberId,
-          cancelReason: '관리자 요청'
+      sweetConfirm(`${deviceId} 계정을 사용재개 하시겠습니까?`, 'question', async () => {
+        const param: userParam = {
+          id: deviceId,
+          password: ''
         };
     
         try {
-          const data = await startMember(param);
-          console.log(`data => ${JSON.stringify(data)}`);
-    
-          if (data.errorCode === 'notExist') {
-            sweetAlert(data.errorMessage, '', 'info', '닫기');
-            return;
+          const data = await startDevice(param);
+            console.log(`data => ${JSON.stringify(data)}`);
+      
+            if (data.errorCode === 'notExist') {
+              sweetAlert(data.errorMessage, '', 'info', '닫기');
+              return;
+            }
+      
+            sweetToast('계정이 사용재개 되었습니다.\n음악신청 가능합니다.');
+            loadDeviceList();
+          } catch (error) {
+            console.log("error=>" + JSON.stringify(error));
+            alert("오류가 발생했습니다.");
           }
-    
-          sweetToast('회원이 사용재개 되었습니다.\n음악신청 가능합니다.');
-          //router.replace('/musics');
-          getMembers({
-            page: page,  // 검색은 항상 첫 페이지부터
-            size,
-            ...searchParams
-          }).then(setMembers);
-        } catch (error) {
-          console.log("error=>" + JSON.stringify(error));
-          alert("오류가 발생했습니다.");
-        }
-      });
+        });
     };
   
     useEffect(() => {
-      loadMembers();
+      loadDeviceList();
     }, [page, size]);
 
     useEffect(() => {
@@ -188,7 +164,7 @@ export default function UsersPage() {
                       variant="contained"
                       color="primary"
                       size="small"
-                      onClick={() => handleReset(member.id, member.email)}
+                      onClick={() => handlePwChange(member.id)}
                     >
                       변경
                     </Button>
@@ -208,8 +184,21 @@ export default function UsersPage() {
             </TableBody>
           </Table>
         </TableContainer>
-        <AccountRegisterModal visible={isModalOpen}  onRefresh={() => loadMembers()} onClose={() => setIsModalOpen(false)} />
-      </div>
+        <AccountRegisterModal visible={isModalOpen}  onRefresh={() => loadDeviceList()} onClose={() => setIsModalOpen(false)} />
+        {pwModalOpen && selectedLoginId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded p-6">
+            <PasswordChangeForm
+              loginId={selectedLoginId}
+              onClose={() => {
+                setPwModalOpen(false);
+                setSelectedLoginId(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+      </div>  
     );
   }
   

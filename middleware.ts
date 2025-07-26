@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    console.log("cookie=>" + cookie);
+    console.log("cookie=>" + JSON.stringify(cookie));
 
     // 로그인 쿠키가 없으면 /login 으로 리다이렉트
     if (!cookie) {

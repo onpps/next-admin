@@ -108,15 +108,3 @@ export async function getMembers(params: PageParam): Promise<Member[]> {
   }
 }
 
-//계정추가
-export const registerUser = async (param: userParam): Promise<memberResponse> => {
-  try {
-    const res = await jwtAxios.post<memberResponse>(`${host}/registerUser`, param);
-    return res.data;
-  } catch (error) {
-    console.error('registerUser error:', error);
-    throw error;
-  }
-};
-
-

@@ -3,10 +3,19 @@
 
 import { removeCookie } from '@/utils/cookieUtil';
 import { sweetToast } from '@/utils/sweetAlert';
+import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 
 export default function LogoutButton() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  console.log("pathname=>" + pathname);
+
+  // 로그인 페이지에서는 로그아웃 버튼 숨김
+  if (pathname === '/login') {
+    return null;
+  }
 
   const handleLogout = () => {
     // 실제 로그아웃 로직 처리 후, 로그인 페이지로 이동 등

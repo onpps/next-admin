@@ -3,14 +3,14 @@ import useCustomMove from "@/utils/useCustomMove";
 import { fetchMembers, resetPassword, stopMember, startMember } from '../../api/memberApi';
 import { Member, MemberListResponse } from '../../types/Member';
 import { useEffect, useState } from "react";
-//import Button from '@/components/Button';
+import PageComponent from "@/components/PageComponent";
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button
 } from '@mui/material';
 
 const initState = {
-  memberRole: "",
+  memberRole: "MANAGER",
   memberId: "",
   memberEmail: "",
 };
@@ -176,8 +176,8 @@ export default function UsersPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <select className="p-2 rounded border border-gray-300" name="memberRole" onChange={handleChange}>
               <option value="">회원권한</option>
-              <option value="MANAGER">매니져</option>
-              <option value="USER">사용자</option>
+              <option value="MANAGER">매장관리자</option>
+              <option value="USER">단말기계정</option>
             </select>
 
             <input
@@ -248,6 +248,7 @@ export default function UsersPage() {
               ))}
             </TableBody>
           </Table>
+          <PageComponent serverData={members} movePage={moveToList}></PageComponent>
         </TableContainer>
       </div>
     );

@@ -1,7 +1,7 @@
 // components/AccountRegisterModal.js
 import { useState } from "react";
 import { sweetAlert } from '@/utils/sweetAlert';
-import { registerUser } from "@/api/memberApi";
+import { registerUser } from "@/api/deviceApi";
 
 export default function AccountRegisterModal({ visible, onRefresh, onClose }) {
   if (!visible) return null;
