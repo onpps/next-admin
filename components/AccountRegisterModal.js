@@ -4,8 +4,6 @@ import { sweetAlert } from '@/utils/sweetAlert';
 import { registerUser } from "@/api/deviceApi";
 
 export default function AccountRegisterModal({ visible, onRefresh, onClose }) {
-  if (!visible) return null;
-
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
@@ -13,6 +11,8 @@ export default function AccountRegisterModal({ visible, onRefresh, onClose }) {
     password: '',
     confirmPassword: '',
   });
+
+  if (!visible) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;

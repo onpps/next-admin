@@ -60,7 +60,7 @@ const PasswordChangeForm: React.FC<Props> = ({ loginId, onClose }) => {
         setError(data.message || '비밀번호 변경 실패');
       }
     } catch (error) {
-      setError('서버 오류');
+      setError('서버 오류:' + error);
     } finally {
       setLoading(false);
     }

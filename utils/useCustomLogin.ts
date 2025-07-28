@@ -1,7 +1,6 @@
 "use client";
 
-import { useDispatch, useSelector } from "react-redux";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 //import { AppDispatch, RootState } from "@/store";
 //import { login, loginPostAsync, logout } from "@/slices/loginSlice";
 //import { registerMember } from "@/api/memberApi";

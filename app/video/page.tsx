@@ -3,15 +3,6 @@
 import React, { useState } from 'react';
 import HLSPlayer from '@/components/HLSPlayer';
 
-const initState = {
-  regDate: ""
-};
-
-interface StopParam {
-  videoId: string;
-  cancelReason: string;
-}
-
 export default function VideoPage() {
     const [inputUrl, setInputUrl] = useState("");
     const [streamUrl, setStreamUrl] = useState("");

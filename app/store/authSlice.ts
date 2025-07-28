@@ -30,6 +30,7 @@ const authSlice = createSlice({
       //state.token = action.payload.token;
       //state.username = action.payload.username;
       console.log("login.....");
+      console.log("state=>" + JSON.stringify(state));
 
       const data = action.payload;
 
@@ -41,7 +42,8 @@ const authSlice = createSlice({
     },
     logout(state) {
       console.log("logout.....");
-
+      console.log("state=>" + JSON.stringify(state));
+      
       removeCookie("member");
 
       //state.token = null;
