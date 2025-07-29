@@ -1,6 +1,6 @@
 import jwtAxios from "../utils/jwtUtil";
 import { MusicListResponse, PlayListResponse } from "../types/Music";
-import { API_SERVER_HOST } from "./config"
+import { API_SERVER_HOST } from "@/utils/config";
 
 const host = `${API_SERVER_HOST}/api/music`
 

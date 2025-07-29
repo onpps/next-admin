@@ -1,7 +1,8 @@
 // api/LoginApi.ts
 import axios from "axios"
+import { API_SERVER_HOST } from "@/utils/config";
 
-const API_URL = "http://localhost:8080/api/member";
+const host = `${API_SERVER_HOST}/api/member`
 
 export interface LoginData {
   email: string;
@@ -18,20 +19,10 @@ export const doLogin = async (loginData: LoginData) => {
   form.append('password', loginData.password);
 
   try {
-    const response = await axios.post(`${API_URL}/login`, form, header);
+    const response = await axios.post(`${host}/login`, form, header);
     return response.data;
   } catch (error) {
     console.error("로그인 에러:", error);
     throw error;
-  }
-};
-
-export const fetchUserInfo = async () => {
-  try {
-    const response = await axios.get("/auth/me");
-    return response.data;
-  } catch (error) {
-    console.error("사용자 정보 조회 실패:", error);
-    return null;
   }
 };
