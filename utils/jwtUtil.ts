@@ -1,7 +1,9 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { getCookie, setCookie } from "./cookieUtil";
-import { API_SERVER_HOST } from "./config";
+//import { API_SERVER_HOST } from "./config";
 import { sweetToast } from '@/utils/sweetAlert';
+
+export const API_SERVER_HOST = process.env.NEXT_PUBLIC_API_SERVER_HOST;
 
 const jwtAxios: AxiosInstance = axios.create({
   withCredentials: true,  // 쿠키 포함 전송!

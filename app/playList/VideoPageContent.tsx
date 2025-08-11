@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { fetchPlayList, stopMusicItem, startMusicItem, updateNewSort } from '../../api/musicApi';
 import { PlayListResponse, MusicItem } from '../../types/Music';
 import PageComponent from "@/components/PageComponent";
 import useCustomMove from '@/utils/useCustomMove';
+import Swal from 'sweetalert2';
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
 import Button from '@/components/Button';
 import YouTube from 'react-youtube';
@@ -16,11 +18,14 @@ const initState = {
 };
 
 interface StopParam {
-  videoId: string;
+  mno: string;
+  cancelYn: string;
   cancelReason: string;
 }
 
 export default function VideoPageContent() {
+    const router = useRouter();
+
     const {page, size, moveToList} = useCustomMove();
     const [searchParams, setSearchParams] = useState(initState);
 
@@ -67,47 +72,69 @@ export default function VideoPageContent() {
         });
     };    
 
-    const handleStop = (videoId: string) => {
-    
-      console.log(`videoId => ${videoId}`);
-    
-      sweetConfirm(`${videoId} 영상을 사용중지 하시겠습니까?`, 'question', async () => {
-        const param: StopParam = {
-          videoId,
-          cancelReason: '관리자 요청'
-        };
-    
+
+    const handleStop = (mno: string) => {
+      console.log(`mno => ${mno}`);
+
+      sweetConfirm(`영상을 중지 하시겠습니까?`, 'question', async () => {
+        // SweetAlert2 직접 호출
+        const { value: reason } = await Swal.fire({
+          title: '중지 사유를 선택하세요',
+          icon: 'question',
+          input: 'select',
+          inputOptions: {
+            '분위기에 어울리지 않는 곡': '분위기에 어울리지 않는 곡',
+            '가사 부적절': '가사 부적절',
+            '기타': '기타',
+          },
+          inputPlaceholder: '사유 선택',
+          showCancelButton: true,
+          confirmButtonText: '확인',
+          cancelButtonText: '취소',
+        });
+
+        if (!reason) {
+          sweetToast('중지 사유를 선택해야 합니다.');
+          return;
+        }
+
         try {
+          const param: StopParam = {
+            mno,
+            cancelYn: 'Y',
+            cancelReason: reason,
+          };
+
           const data = await stopMusicItem(param);
           console.log(`data => ${JSON.stringify(data)}`);
-    
+
           if (data.errorCode === 'notExist' || data.errorCode === 'refundError') {
-            sweetAlert(data.errorMessage, '', 'info', '닫기');
+            sweetAlert({
+              title: data.errorMessage,
+              icon: 'info',
+              confirmButtonText: '닫기',
+            });
             return;
           }
-    
-          sweetToast('음악이 중지 되었습니다.\n중지된 음악은 신청이 불가합니다.');
-          //router.replace('/musics');
-          fetchPlayList({
-            page: page,  // 검색은 항상 첫 페이지부터
-            size,
-            ...searchParams
-          }).then(setMusicItems);
+
+          sweetToast(`음악이 중지 되었습니다.\n사유: ${reason}`);
+          fetchPlayList({ page, size, ...searchParams }).then(setMusicItems);
         } catch (error) {
-          console.log("error=>" + JSON.stringify(error));
-          alert("오류가 발생했습니다.");
+          console.log('error=>' + JSON.stringify(error));
+          alert('오류가 발생했습니다.');
         }
       });
     };
 
 
-    const handleResume = (videoId: string) => {
+    const handleResume = (mno: string) => {
     
-      console.log(`videoId => ${videoId}`);
+      console.log(`mno => ${mno}`);
     
-      sweetConfirm(`${videoId} 영상을 사용재개 하시겠습니까?`, 'question', async () => {
+      sweetConfirm(`영상을 사용재개 하시겠습니까?`, 'question', async () => {
         const param: StopParam = {
-          videoId,
+          mno: mno,
+          cancelYn: 'N',
           cancelReason: '관리자 요청'
         };
     
@@ -120,7 +147,7 @@ export default function VideoPageContent() {
             return;
           }
     
-          sweetToast('음악이 사용재개 되었습니다.\n음악신청 가능합니다.');
+          sweetToast('음악이 사용재개 되었습니다.');
           //router.replace('/musics');
           fetchPlayList({
             page: page,
@@ -196,6 +223,10 @@ export default function VideoPageContent() {
 
       saveNewSort(items);
     };    
+
+    const goVideo = (videoId: string) => {
+      router.replace(`/video/${videoId}`);
+    };
         
     return (
       <div>
@@ -242,7 +273,7 @@ export default function VideoPageContent() {
               <thead>
               <tr className="bg-gray-100 text-center">
                 <th className="p-3">순서</th>
-                <th className="p-3">비디오 아이디</th>
+                <th className="p-3">계정</th>
                 <th className="p-3">이미지</th>
                 <th className="p-3">제목</th>
                 <th className="p-3">작가</th>
@@ -253,58 +284,72 @@ export default function VideoPageContent() {
               </tr>
               </thead>
               <tbody>
-                {musicItems?.dtoList?.length > 0 ? (
+               {musicItems?.dtoList?.length > 0 ? (
                   musicItems.dtoList.map((music: MusicItem, idx: number) => (
                     <Draggable key={music.videoId} draggableId={music.videoId} index={idx}>
                       {(provided) => (
-                        <tr
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="border-b hover:bg-gray-50"
-                        >
-                          <td className="p-3 text-center">{idx + 1}</td>
-                          <td className="p-3 text-center">{music.videoId}</td>
-                          <td className="p-3 text-center">
-                            <Image
-                              src={music.imageFile}
-                              alt={music.title}
-                              width={150}
-                              height={100}
-                              style={{ objectFit: 'cover', borderRadius: '8px' }}
-                            />
-                          </td>
-                          <td className="p-3 text-center">{music.title}</td>
-                          <td className="p-3 text-center">{music.author}</td>
-                          <td className="p-3 text-center">{music.word}</td>
-                          <td className="p-3 text-center">
-                            <button
-                              className="text-blue-600 hover:text-blue-800"
-                              onClick={() => setPreviewVideo(music.videoId)}
+                          <tr
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="border-b hover:bg-gray-50 relative"
                             >
-                              <Eye size={20} />
-                            </button>
-                          </td>
-                          <td className="p-3 text-center">
-                            {/* ✅ 재생완료 표시 */}
-                            {music.playYn === 'Y' ? (
-                              <span className="text-green-600 font-semibold">재생완료</span>
-                            ) : (
-                              <span className="text-gray-400">대기중</span>
-                            )}
-                          </td>
-                          <td className="p-3 text-center">
-                            <Button
-                              variant={music.cancelYn === 'N' ? 'danger' : 'primary'}
-                              label={music.cancelYn === 'N' ? '사용재개' : '사용중지'}
-                              onClick={() =>
-                                music.cancelYn === 'N'
-                                  ? handleResume(music.videoId)
-                                  : handleStop(music.videoId)
-                              }
-                            />
-                          </td>
-                        </tr>
+                              <td className="p-3 text-center">{idx + 1}</td>
+                              <td className="p-3 text-center">{music.id}</td>
+                              <td className="p-3 text-center">
+                                <Image
+                                  src={music.imageFile}
+                                  alt={music.title}
+                                  width={150}
+                                  height={100}
+                                  style={{ objectFit: 'cover', borderRadius: '8px' }}
+                                  onClick={() => goVideo(music.videoId)}
+                                />
+                              </td>
+                              <td className="p-3 text-center">{music.title}</td>
+                              <td className="p-3 text-center">{music.author}</td>
+                              <td className="p-3 text-center">{music.word}</td>
+                              <td className="p-3 text-center">
+                                <button
+                                  className="text-blue-600 hover:text-blue-800"
+                                  onClick={() => setPreviewVideo(music.videoId)}
+                                >
+                                  <Eye size={20} />
+                                </button>
+                              </td>
+                              <td className="p-3 text-center">
+                                {music.playYn === 'Y' ? (
+                                  <span className="text-green-600 font-semibold">재생완료</span>
+                                ) : (
+                                  <span className="text-gray-400">대기중</span>
+                                )}
+                              </td>
+                              <td className="p-3 text-center">
+                                {music.playYn !== 'Y' && (
+                                  <Button
+                                    variant={music.cancelYn === 'Y' ? 'danger' : 'primary'}
+                                    label={music.cancelYn === 'Y' ? '사용재개' : '취소'}
+                                    onClick={() =>
+                                      music.cancelYn === 'Y'
+                                        ? handleResume(music.mno)
+                                        : handleStop(music.mno)
+                                    }
+                                  />
+                                )}
+                              </td>
+                              <td>
+                              {/* 취소 사유 라벨 (레이아웃 영향 없음) */}
+                              {music.cancelYn === 'Y' && (
+                                <div
+                                  className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+                                >
+                                  <span className="bg-red-600 text-white text-xs px-2 py-1 rounded shadow">
+                                    {music.cancelReason}
+                                  </span>
+                                </div>
+                              )}
+                              </td>
+                            </tr>
                       )}
                     </Draggable>
                   ))
@@ -315,6 +360,7 @@ export default function VideoPageContent() {
                     </td>
                   </tr>
                 )}
+
                 {provided.placeholder}
               </tbody>
             </table>

@@ -1,6 +1,8 @@
 // api/LoginApi.ts
 import axios from "axios"
-import { API_SERVER_HOST } from "@/utils/config";
+//import { API_SERVER_HOST } from "@/utils/config";
+
+export const API_SERVER_HOST = process.env.NEXT_PUBLIC_API_SERVER_HOST;
 
 const host = `${API_SERVER_HOST}/api/member`
 

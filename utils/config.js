@@ -1,6 +1,3 @@
-export const API_SERVER_HOST = 'https://www.music-q.co.kr';
-//export const API_SERVER_HOST = 'http://localhost:8080';
-
 // 회원권한
 export const obj = {
     USER : 0,

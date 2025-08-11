@@ -1,6 +1,8 @@
 import jwtAxios from "../utils/jwtUtil";
 import { MusicListResponse, PlayListResponse } from "../types/Music";
-import { API_SERVER_HOST } from "@/utils/config";
+//import { API_SERVER_HOST } from "@/utils/config";
+
+export const API_SERVER_HOST = process.env.NEXT_PUBLIC_API_SERVER_HOST;
 
 const host = `${API_SERVER_HOST}/api/music`
 
@@ -13,7 +15,7 @@ interface PageParam {
 }
 
 interface MusicParam {
-  videoId: string;
+  mno: string;
   cancelReason: string;
 }
 
@@ -88,6 +90,11 @@ export async function fetchPlayList(params: PageParam): Promise<PlayListResponse
   }
 }
 
+export const getMusicItem = async (videoId: string) => {
+  const res = await jwtAxios.get(`${host}/${videoId}`);
+
+  return res.data;
+}
 
 //비디오 중지
 export const stopMusic = async (param: MusicParam): Promise<MusicResponse> => {
@@ -114,7 +121,7 @@ export const startMusic = async (param: MusicParam): Promise<MusicResponse> => {
 //플레이 중지
 export const stopMusicItem = async (param: MusicParam): Promise<MusicResponse> => {
   try {
-    const res = await jwtAxios.post<MusicResponse>(`${host}/stopItem`, param);
+    const res = await jwtAxios.post<MusicResponse>(`${host}/itemAdminCancelYn`, param);
     return res.data;
   } catch (error) {
     console.error('stopMusicItem error:', error);
@@ -125,14 +132,13 @@ export const stopMusicItem = async (param: MusicParam): Promise<MusicResponse> =
 //플레이 사용재개
 export const startMusicItem = async (param: MusicParam): Promise<MusicResponse> => {
   try {
-    const res = await jwtAxios.post<MusicResponse>(`${host}/startItem`, param);
+    const res = await jwtAxios.post<MusicResponse>(`${host}/itemAdminCancelYn`, param);
     return res.data;
   } catch (error) {
     console.error('startMusicItem error:', error);
     throw error;
   }
 };
-
 
 export const updateNewSort = async (param: MusicSortParam[]): Promise<MusicResponse> => {
   try {

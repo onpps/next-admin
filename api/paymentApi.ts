@@ -1,7 +1,9 @@
 import jwtAxios from "../utils/jwtUtil";
 import { PaymentListResponse } from "../types/Payment";
 
-const API_URL = "http://localhost:8080/api/payment";
+export const API_SERVER_HOST = process.env.NEXT_PUBLIC_API_SERVER_HOST;
+
+const host = `${API_SERVER_HOST}/api/payment`
 
 interface PageParam {
   page: number;
@@ -30,7 +32,7 @@ export async function fetchPayments(params: PageParam): Promise<PaymentListRespo
 
     console.log("params=>" + JSON.stringify(params));
 
-    const response = await jwtAxios.post(`${API_URL}/list`, params);
+    const response = await jwtAxios.post(`${host}/list`, params);
 
     // 서버가 JSON 형식의 배열을 반환한다고 가정
     //const data: Payment[] = response.data;
@@ -57,7 +59,7 @@ export async function fetchPayments(params: PageParam): Promise<PaymentListRespo
 //결제 취소
 export const cancelPayment = async (param: CancelPaymentParam): Promise<CancelPaymentResponse> => {
   try {
-    const res = await jwtAxios.post<CancelPaymentResponse>(`${API_URL}/cancel`, param);
+    const res = await jwtAxios.post<CancelPaymentResponse>(`${host}/cancel`, param);
     return res.data;
   } catch (error) {
     console.error('cancelPayment error:', error);

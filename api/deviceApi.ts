@@ -1,6 +1,8 @@
 import jwtAxios from "../utils/jwtUtil";
 import { MemberListResponse, Member } from "../types/Member";
-import { API_SERVER_HOST } from "@/utils/config";
+//import { API_SERVER_HOST } from "@/utils/config";
+
+export const API_SERVER_HOST = process.env.NEXT_PUBLIC_API_SERVER_HOST;
 
 const host = `${API_SERVER_HOST}/api/device`
 
@@ -21,6 +23,11 @@ interface memberResponse {
 interface userParam {
   id: string;
   password: string;
+}
+
+interface limitParam {
+  id: string;
+  numberOfSongLimit : number;
 }
 
 //계정 리스트
@@ -82,6 +89,17 @@ export const startDevice = async (param: userParam): Promise<memberResponse> => 
     return res.data;
   } catch (error) {
     console.error('startMember error:', error);
+    throw error;
+  }
+};
+
+//신청곡갯수 수정
+export const changeNumberOfSongLimit = async (param: limitParam): Promise<memberResponse> => {
+  try {
+    const res = await jwtAxios.post<memberResponse>(`${host}/changeNumberOfSongLimit`, param);
+    return res.data;
+  } catch (error) {
+    console.error('changeNumberOfSongLimit error:', error);
     throw error;
   }
 };

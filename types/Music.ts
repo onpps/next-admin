@@ -21,6 +21,7 @@ export interface MusicItem {
   imageFile: string;
   playYn: string;
   cancelYn: string;
+  cancelReason: string;
   word: string;
   sort: string;
   regDate: string;

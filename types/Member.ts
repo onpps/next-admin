@@ -3,12 +3,14 @@ export interface Member {
   email: string;
   nickname: string;
   name: string;
+  storeId: string;
   storeName: string;
   zonecode: string;
   address1: string;
   address2: string;
   phone: string;
   social: boolean;
+  numberOfSongLimit: number;
   numberOfSongRequests: number;
   useYn: string | null;
   joinDate: string;

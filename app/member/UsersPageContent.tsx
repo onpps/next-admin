@@ -7,14 +7,21 @@ import AccountRegisterModal from '@/components/AccountRegisterModal';
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TextField
 } from '@mui/material';
-import { getDeviceList, startDevice, stopDevice } from '../../api/deviceApi';
+import CustomStepper from "@/components/CustomStepper";
+import { getDeviceList, startDevice, stopDevice, changeNumberOfSongLimit } from '../../api/deviceApi';
 import { Member } from '../../types/Member';
 
 interface userParam {
   id: string;
   password: string;
+}
+
+interface limitParam {
+  id: string;
+  storeId : string;
+  numberOfSongLimit: number;
 }
 
 export default function UsersPageContent() {
@@ -74,6 +81,26 @@ export default function UsersPageContent() {
     });
   };
 
+  const handleValueChange = async (memberId: string, storeId: string, newValue: number) => {
+    console.log("memberId:", memberId);
+    console.log("storeId:", storeId);  
+    console.log("변경된 값:", newValue);
+
+      const param: limitParam = { id: memberId, storeId: storeId, numberOfSongLimit: newValue };
+      try {
+        const data = await changeNumberOfSongLimit(param);
+        console.log("data=>" + JSON.stringify(data));
+        if (data.errorCode === 'notExist' || data.errorCode === 'authFail') {
+          sweetAlert(data.errorMessage, '', 'info', '닫기');
+          return;
+        }
+        sweetToast('신청가능 갯수가 수정되었습니다.');
+        loadDeviceList();
+      } catch (error) {
+        alert("오류발생:" + error);
+      }
+  };
+
   useEffect(() => {
     loadDeviceList();
   }, [loadDeviceList]);
@@ -99,7 +126,7 @@ export default function UsersPageContent() {
         <Table sx={{ minWidth: 1200 }} aria-label="Member Table">
           <TableHead>
             <TableRow>
-              {['계정아이디', '신청곡 갯수', '등록일', '비밀번호', '차단'].map((title) => (
+              {['매장아이디', '계정아이디', '현재신청갯수', '신청가능갯수', '등록일', '비밀번호', '차단'].map((title) => (
                 <TableCell key={title} align="center" sx={{ fontWeight: 'bold' }}>
                   {title}
                 </TableCell>
@@ -109,8 +136,12 @@ export default function UsersPageContent() {
           <TableBody>
             {members?.map((member: Member) => (
               <TableRow key={member.id}>
+                <TableCell align="center">{member.storeId}</TableCell>
                 <TableCell align="center">{member.id}</TableCell>
                 <TableCell align="center">{member.numberOfSongRequests}</TableCell>
+                <TableCell align="center">
+                  <CustomStepper value={member.numberOfSongLimit} onChange={(newValue) => handleValueChange(member.id, member.storeId, newValue)} />
+                </TableCell>
                 <TableCell align="center">{member.joinDate}</TableCell>
                 <TableCell align="center">
                   <Button
