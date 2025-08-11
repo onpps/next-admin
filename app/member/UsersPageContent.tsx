@@ -7,7 +7,7 @@ import AccountRegisterModal from '@/components/AccountRegisterModal';
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TextField
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button
 } from '@mui/material';
 import CustomStepper from "@/components/CustomStepper";
 import { getDeviceList, startDevice, stopDevice, changeNumberOfSongLimit } from '../../api/deviceApi';

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { getCookie } from '@/utils/cookieUtil';
 
 interface MemberInfo {
-  roleNames: string;
+  roleNames: string[];  // roleNames가 배열임을 명시하는 게 좋습니다.
 }
 
 export default function Sidebar() {
@@ -13,10 +13,7 @@ export default function Sidebar() {
 
   const rawCookie = getCookie("member");
 
-  //let isAdmin = false;
-
   useEffect(() => {
-
     try {
       let memberInfo: MemberInfo | undefined;
 
@@ -25,26 +22,26 @@ export default function Sidebar() {
       if (typeof rawCookie === 'string') {
         memberInfo = JSON.parse(rawCookie);
       } else if (typeof rawCookie === 'object' && rawCookie !== null) {
-        // 이미 객체인 경우 그대로 사용
-        memberInfo = rawCookie ;
+        memberInfo = rawCookie;
       }
 
-      let roleNames = memberInfo?.roleNames;
+      const roleNames = memberInfo?.roleNames;
 
-      // isAdmin은 roleNames가 배열일 때만 검사
+      // roleNames가 배열일 때만 검사
       const isAdmin = Array.isArray(roleNames) && roleNames.includes("ADMIN");
 
       if(isAdmin){
         setIsAdmin(true);
+      } else {
+        setIsAdmin(false); // 명시적으로 false 처리도 권장
       }
-      
+
       console.log("roleNames =>", roleNames);
       console.log("isAdmin =>", isAdmin);
     } catch (err) {
       console.error("memberInfo 파싱 오류:", err);
     }
-
-  }, []);
+  }, [rawCookie]);  // rawCookie 의존성 추가
 
   return (
     <aside className="w-48 h-screen bg-gray-800 text-white p-4">

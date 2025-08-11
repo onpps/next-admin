@@ -17,38 +17,6 @@ export default function VideoPage() {
   const playerRef = useRef(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [loading, setLoading] = useState(true);
-
-  // 전체화면 요청 함수
-  const requestFullScreen = () => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    if (el.requestFullscreen) {
-      el.requestFullscreen();
-    } else if ((el as any).webkitRequestFullscreen) {
-      (el as any).webkitRequestFullscreen();
-    } else if ((el as any).mozRequestFullScreen) {
-      (el as any).mozRequestFullScreen();
-    } else if ((el as any).msRequestFullscreen) {
-      (el as any).msRequestFullscreen();
-    }
-  };
-
-   const handleFullScreen = () => {
-    if (containerRef.current) {
-      if (containerRef.current.requestFullscreen) {
-        containerRef.current.requestFullscreen();
-      } else if ((containerRef.current as any).webkitRequestFullscreen) {
-        (containerRef.current as any).webkitRequestFullscreen();
-      } else if ((containerRef.current as any).mozRequestFullScreen) {
-        (containerRef.current as any).mozRequestFullScreen();
-      } else if ((containerRef.current as any).msRequestFullscreen) {
-        (containerRef.current as any).msRequestFullscreen();
-      }
-    }
-  };
-
   const handleVideo = (videoId: string) => {
     console.log("videoEnded...");
     if (videoId) {
@@ -56,7 +24,6 @@ export default function VideoPage() {
         .then(data => {
           console.log("data => " + JSON.stringify(data));
           setVideoDetail(data);
-          setLoading(false);
         })
         .catch(err => console.log(err));
     }
@@ -67,15 +34,6 @@ export default function VideoPage() {
       router.replace(`/video/${videoDetail.videoId}`);
     }
   }, [videoDetail]);
-
-  // 컴포넌트 마운트 시 전체화면 요청
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      requestFullScreen();
-    }, 500); // 브라우저 렌더링 안정화 대기 (필요 시 조절)
-
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%', maxWidth: 800 }}>

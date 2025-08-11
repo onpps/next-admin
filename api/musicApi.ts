@@ -15,6 +15,11 @@ interface PageParam {
 }
 
 interface MusicParam {
+  videoId: string;
+  cancelReason: string;
+}
+
+interface MusicItemParam {
   mno: string;
   cancelReason: string;
 }
@@ -119,7 +124,7 @@ export const startMusic = async (param: MusicParam): Promise<MusicResponse> => {
 };
 
 //플레이 중지
-export const stopMusicItem = async (param: MusicParam): Promise<MusicResponse> => {
+export const stopMusicItem = async (param: MusicItemParam): Promise<MusicResponse> => {
   try {
     const res = await jwtAxios.post<MusicResponse>(`${host}/itemAdminCancelYn`, param);
     return res.data;
@@ -130,7 +135,7 @@ export const stopMusicItem = async (param: MusicParam): Promise<MusicResponse> =
 };
 
 //플레이 사용재개
-export const startMusicItem = async (param: MusicParam): Promise<MusicResponse> => {
+export const startMusicItem = async (param: MusicItemParam): Promise<MusicResponse> => {
   try {
     const res = await jwtAxios.post<MusicResponse>(`${host}/itemAdminCancelYn`, param);
     return res.data;
