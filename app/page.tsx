@@ -6,7 +6,7 @@ import { PlayList } from '@/types/Dashboard';
 import { getDashboardList } from '@/api/dashboardApi';
 import { sweetConfirm } from '@/utils/sweetAlert';
 import { Button } from '@mui/material';
-import { Card, CardContent } from '@/components/ui/Card'; 
+import { Card, CardContent } from '@/components/ui/card'; 
 
 export default function AdminDashboard() {
   /*const [requests, setRequests] = useState([
