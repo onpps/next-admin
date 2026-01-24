@@ -1,35 +1,57 @@
 // components/LogoutButton.tsx
 "use client";
 
-import { removeCookie } from '@/utils/cookieUtil';
-import { sweetToast } from '@/utils/sweetAlert';
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getCookie, removeCookie } from "@/utils/cookieUtil";
+import { sweetToast } from "@/utils/sweetAlert";
+import { usePathname, useRouter } from "next/navigation";
+
+interface MemberInfo {
+  id: string;
+  storeId: string;
+}
 
 export default function LogoutButton() {
   const router = useRouter();
   const pathname = usePathname();
 
-  console.log("pathname=>" + pathname);
+  const [mounted, setMounted] = useState(false);
+  const [member, setMember] = useState<MemberInfo | null>(null);
 
-  // 로그인 페이지에서는 로그아웃 버튼 숨김
-  if (pathname === '/login') {
-    return null;
-  }
+  // ✅ mount 이후에만 쿠키 접근
+  useEffect(() => {
+    setMounted(true);
+
+    const cookieMember = getCookie("member") as MemberInfo | undefined;
+    if (cookieMember) {
+      setMember(cookieMember);
+    }
+  }, []);
 
   const handleLogout = () => {
-    // 실제 로그아웃 로직 처리 후, 로그인 페이지로 이동 등
     sweetToast("로그아웃 되었습니다.");
     removeCookie("member");
     router.push("/login");
   };
 
+  // ✅ 모든 Hook 이후에 조건 분기
+  if (!mounted) return null;
+  if (pathname === "/login") return null;
+
   return (
-    <button
-      className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200"
-      onClick={handleLogout}
-    >
-      로그아웃
-    </button>
+    <div className="flex items-center gap-4">
+      {/* 로그인 아이디 */}
+      <span className="text-sm text-white font-medium flex items-center gap-1">
+        👤 {member?.id}
+      </span>
+
+      {/* 로그아웃 버튼 */}
+      <button
+        onClick={handleLogout}
+        className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200"
+      >
+        로그아웃
+      </button>
+    </div>
   );
 }

@@ -76,10 +76,10 @@ export default function VideoPageContent() {
     const handleStop = (mno: string) => {
       console.log(`mno => ${mno}`);
 
-      sweetConfirm(`영상을 중지 하시겠습니까?`, 'question', async () => {
+      sweetConfirm(`신청곡을 거절 하시겠습니까?`, 'question', async () => {
         // SweetAlert2 직접 호출
         const { value: reason } = await Swal.fire({
-          title: '중지 사유를 선택하세요',
+          title: '거절 사유를 선택하세요',
           icon: 'question',
           input: 'select',
           inputOptions: {
@@ -94,7 +94,7 @@ export default function VideoPageContent() {
         });
 
         if (!reason) {
-          sweetToast('중지 사유를 선택해야 합니다.');
+          sweetToast('거절 사유를 선택해야 합니다.');
           return;
         }
 
@@ -328,7 +328,7 @@ export default function VideoPageContent() {
                                 {music.playYn !== 'Y' && (
                                   <Button
                                     variant={music.cancelYn === 'Y' ? 'danger' : 'primary'}
-                                    label={music.cancelYn === 'Y' ? '사용재개' : '취소'}
+                                    label={music.cancelYn === 'Y' ? '사용재개' : '거절'}
                                     onClick={() =>
                                       music.cancelYn === 'Y'
                                         ? handleResume(music.mno)
