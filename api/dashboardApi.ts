@@ -9,7 +9,6 @@ const host = `${API_SERVER_HOST}/api/dashboard`
 //계정 리스트
 export async function getDashboardList(): Promise<DashboardListResponse> {
   try {
-
     const response = await jwtAxios.get(`${host}/list`);
 
     console.log("response=>" + JSON.stringify(response));

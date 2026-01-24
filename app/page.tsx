@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { PlayList } from '@/types/Dashboard';
 import { getDashboardList } from '@/api/dashboardApi';
 import { sweetConfirm } from '@/utils/sweetAlert';
+import { Button } from '@mui/material';
 import { Card, CardContent } from '@/components/ui/Card'; 
 
 export default function AdminDashboard() {
@@ -36,15 +37,11 @@ export default function AdminDashboard() {
     console.log("requests 변경됨:", requests);
   }, [requests]);
 
-  const approve = (id: number) => {
-    setRequests(req => req.map(r => r.id === id ? { ...r, status: "approved" } : r));
-  };
-
   const reject = (id: number) => {
     //setRequests(req => req.map(r => r.id === id ? { ...r, status: "rejected" } : r));
  
     sweetConfirm(
-      `<span style="font-size:20px;">
+      `<span style="font-size:20px;padding-top:0px;">
         신청곡 거절은 플레이리스트 관리화면에서 가능합니다.
         이동 하시겠습니까?
       </span>`,
@@ -114,10 +111,11 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-2 px-2">
                         <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => reject(r.mno)}
-                        >
+                            variant="contained"
+                            color="info"
+                            size="small"
+                            onClick={() => reject(r.mno)}
+                          >
                           거절
                         </Button>
                       </td>
@@ -143,44 +141,5 @@ export default function AdminDashboard() {
         </Card> */}
       </div>
     </div>
-  );
-}
-
-function Kpi({ title, value }: { title: string; value: string }) {
-  return (
-    <Card>
-      <CardContent>
-        <p className="text-sm text-gray-500">{title}</p>
-        <p className="text-xl font-bold">{value}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function Button({
-  children,
-  onClick,
-  variant = "default",
-  size = "md",
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  variant?: "default" | "destructive" | "outline";
-  size?: "sm" | "md";
-}) {
-  const base =
-    "rounded px-3 py-1 text-sm font-medium transition";
-  const variants = {
-    default: "bg-black text-white",
-    destructive: "bg-red-500 text-white",
-    outline: "border",
-  };
-  return (
-    <button
-      onClick={onClick}
-      className={`${base} ${variants[variant]}`}
-    >
-      {children}
-    </button>
   );
 }
