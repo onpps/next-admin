@@ -37,7 +37,7 @@ export default function AdminDashboard() {
     console.log("requests 변경됨:", requests);
   }, [requests]);
 
-  const reject = (id: number) => {
+  const reject = () => {
     //setRequests(req => req.map(r => r.id === id ? { ...r, status: "rejected" } : r));
  
     sweetConfirm(
@@ -57,7 +57,6 @@ export default function AdminDashboard() {
       {/* Header */}
       <header className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-white">🎵 매장 관리자 대시보드</h1>
-        <Button variant="outline">설정</Button>
       </header>
 
      <Card>
@@ -114,7 +113,7 @@ export default function AdminDashboard() {
                             variant="contained"
                             color="info"
                             size="small"
-                            onClick={() => reject(r.mno)}
+                            onClick={() => reject()}
                           >
                           거절
                         </Button>
