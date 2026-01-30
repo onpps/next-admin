@@ -13,11 +13,6 @@ const initState = {
   loginDate: today   // 오늘날짜
 };
 
-interface StopParam {
-  videoId: string;
-  cancelReason: string;
-}
-
 export default function LoginHistoryPageContent() {
     const {page, size, moveToList} = useCustomMove();
     const [searchParams, setSearchParams] = useState(initState);
@@ -34,8 +29,6 @@ export default function LoginHistoryPageContent() {
       totalPage: 0,
       current: 0
     });
-
-    const [previewVideo, setPreviewVideo] = useState<string | null>(null);
 
     // 공통 onChange 핸들러
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
