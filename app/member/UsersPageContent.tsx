@@ -126,7 +126,7 @@ export default function UsersPageContent() {
         <Table sx={{ minWidth: 1200 }} aria-label="Member Table">
           <TableHead>
             <TableRow>
-              {['매장아이디', '계정아이디', '현재신청갯수', '신청가능갯수', '등록일', '비밀번호', '차단'].map((title) => (
+              {['매장아이디', '단말기번호', '계정아이디', '현재신청갯수', '신청가능갯수', '등록일', '비밀번호', '차단'].map((title) => (
                 <TableCell key={title} align="center" sx={{ fontWeight: 'bold' }}>
                   {title}
                 </TableCell>
@@ -137,6 +137,7 @@ export default function UsersPageContent() {
             {members?.map((member: Member) => (
               <TableRow key={member.id}>
                 <TableCell align="center">{member.storeId}</TableCell>
+                <TableCell align="center">{member.groupId}</TableCell>
                 <TableCell align="center">{member.id}</TableCell>
                 <TableCell align="center">{member.numberOfSongRequests}</TableCell>
                 <TableCell align="center">

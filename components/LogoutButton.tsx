@@ -23,6 +23,9 @@ export default function LogoutButton() {
     setMounted(true);
 
     const cookieMember = getCookie("member") as MemberInfo | undefined;
+
+    console.log("cookieMember=>" + JSON.stringify(cookieMember));
+    
     if (cookieMember) {
       setMember(cookieMember);
     }

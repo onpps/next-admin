@@ -3,6 +3,7 @@ export interface Member {
   email: string;
   nickname: string;
   name: string;
+  groupId: number;
   storeId: string;
   storeName: string;
   zonecode: string;
