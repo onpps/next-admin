@@ -10,13 +10,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isVideoPage = pathname.startsWith("/video");
 
+  const isPlayerPage = pathname.startsWith("/player");
+
   console.log("pathname=>" + pathname);
   console.log("isVideoPage=>" + isVideoPage);
 
-  //if (isVideoPage) {
-    // video 페이지는 layout 없이 children만 렌더
-   // return <>{children}</>;
-  //}
+  // 유튜브 플레이어 페이지는 완전 빈 레이아웃
+  if (isPlayerPage) {
+    return (
+      <html lang="ko">
+        <body className="w-full h-screen bg-black overflow-hidden">
+          {children}
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html lang="ko">

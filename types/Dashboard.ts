@@ -1,6 +1,7 @@
 export interface PlayList {
   mno: number;
-  id: number; 
+  id: number;
+  videoId: string;
   title: string;
   author: string;
   playYn: string;
