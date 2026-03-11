@@ -13,10 +13,15 @@ import {
   FormLabel,
   FormControlLabel,
   Snackbar, 
-  Alert
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { getConfig, saveConfig } from "@/api/configApi";
+import { getConfig, saveConfig, changePassword } from "@/api/configApi";
 
 /* 설정 타입 명확히 정의 */
 interface StoreSettings {
@@ -31,8 +36,31 @@ export default function ConfigPageContent() {
     searchSource: "api",
   });
 
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+
+  const [passwordError, setPasswordError] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,16}$/;
+
   const handleChange = (key: string, value: string) => {
     setSettings((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handlePasswordChange = (key: string, value: string) => {
+    setPasswordForm((prev) => ({
       ...prev,
       [key]: value,
     }));
@@ -57,6 +85,71 @@ export default function ConfigPageContent() {
 
     fetchConfig();
   }, []);
+
+  const handlePasswordUpdate = async () => {
+
+    const errors = {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    };
+
+    if (!passwordForm.currentPassword) {
+      errors.currentPassword = "현재 비밀번호를 입력하세요.";
+    }
+
+    if (!passwordForm.newPassword) {
+      errors.newPassword = "새 비밀번호를 입력하세요.";
+    } else if (!passwordRegex.test(passwordForm.newPassword)) {
+      errors.newPassword =
+        "비밀번호는 8~16자 영문 대/소문자, 숫자, 특수문자를 포함해야 합니다.";
+    }
+
+    if (!passwordForm.confirmPassword) {
+      errors.confirmPassword = "새 비밀번호 확인을 입력하세요.";
+    } else if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      errors.confirmPassword = "비밀번호가 일치하지 않습니다.";
+    }
+
+    setPasswordError(errors);
+
+    if (
+      errors.currentPassword ||
+      errors.newPassword ||
+      errors.confirmPassword
+    ) {
+      return;
+    }
+
+    try {
+
+      /*await fetch("/api/config/changePassword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(passwordForm),
+      });*/
+
+      await changePassword(passwordForm);
+
+      setPasswordDialogOpen(false);
+
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+
+      setError(false);
+      setOpen(true);
+
+    } catch (e) {
+      console.log(e);
+      setError(true);
+      setOpen(true);
+    }
+  };
 
   const handleSave = async () => {
     console.log("저장 데이터:", settings);
@@ -123,6 +216,36 @@ export default function ConfigPageContent() {
         </Grid>
 
         <Grid size={12}>
+          <Card>
+            <CardContent>
+
+              <Typography variant="h6" gutterBottom>
+                보안 설정
+              </Typography>
+
+              <Divider sx={{ mb: 3 }} />
+
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Typography>비밀번호 변경</Typography>
+
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => setPasswordDialogOpen(true)}
+                >
+                  변경하기
+                </Button>
+              </Box>
+
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid size={12}>
           <Box display="flex" justifyContent="flex-end">
             <Button variant="contained" size="large" onClick={handleSave}>
               설정 저장
@@ -130,6 +253,73 @@ export default function ConfigPageContent() {
           </Box>
         </Grid>
       </Grid>
+
+      <Dialog
+          open={passwordDialogOpen}
+          onClose={() => setPasswordDialogOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>비밀번호 변경</DialogTitle>
+
+          <DialogContent>
+
+           <TextField
+              fullWidth
+              margin="normal"
+              type="password"
+              label="현재 비밀번호"
+              value={passwordForm.currentPassword}
+              error={!!passwordError.currentPassword}
+              helperText={passwordError.currentPassword}
+              onChange={(e) =>
+                handlePasswordChange("currentPassword", e.target.value)
+              }
+            />
+
+            <TextField
+              fullWidth
+              margin="normal"
+              type="password"
+              label="새 비밀번호"
+              value={passwordForm.newPassword}
+              error={!!passwordError.newPassword}
+              helperText={passwordError.newPassword}
+              onChange={(e) =>
+                handlePasswordChange("newPassword", e.target.value)
+              }
+            />
+
+          <TextField
+            fullWidth
+            margin="normal"
+            type="password"
+            label="새 비밀번호 확인"
+            value={passwordForm.confirmPassword}
+            error={!!passwordError.confirmPassword}
+            helperText={passwordError.confirmPassword}
+            onChange={(e) =>
+              handlePasswordChange("confirmPassword", e.target.value)
+            }
+          />
+
+          </DialogContent>
+
+          <DialogActions>
+
+            <Button onClick={() => setPasswordDialogOpen(false)}>
+              취소
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={handlePasswordUpdate}
+            >
+              변경
+            </Button>
+
+          </DialogActions>
+        </Dialog>
 
       <Snackbar
         open={open}

@@ -7,6 +7,7 @@ import PageComponent from "@/components/PageComponent";
 import useCustomMove from '@/utils/useCustomMove';
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
 import Button from '@/components/Button';
+import HlsPlayer from '../player/HlsPlayer';
 import YouTube from 'react-youtube';
 import { FaPlay } from "react-icons/fa";
 import Image from 'next/image';
@@ -42,6 +43,8 @@ export default function MusicPageContent() {
     });
 
     const [previewVideo, setPreviewVideo] = useState<string | null>(null);
+    const [previewStreamUrl, setPreviewStreamUrl] = useState<string | null>(null);
+    
 
     // 공통 onChange 핸들러
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -124,6 +127,11 @@ export default function MusicPageContent() {
       });
     };
 
+    const closePlayer = () => {
+      setPreviewVideo(null);
+      setPreviewStreamUrl(null);
+    };
+    
     useEffect(() => {
       fetchMusics({page, size, ...searchParams}).then(setMusics);
     }, [page, size, searchParams]);
@@ -193,18 +201,27 @@ export default function MusicPageContent() {
               <tr key={music.videoId} className="border-t">
                 <td className="p-3 text-center">{music.videoId}</td>
                 <td className="p-3 text-center"><Image
-                                                src={music.thumbUrl}
-                                                alt={music.title}
-                                                width={150}  // 썸네일 가로 크기
-                                                height={100} // 썸네일 세로 크기
-                                                style={{ objectFit: 'cover', borderRadius: '8px' }}
+                                                 src={music.thumbUrl || "/no-image.png"}
+                                                 alt={music.title}
+                                                 width={150}  // 썸네일 가로 크기
+                                                 height={100} // 썸네일 세로 크기
+                                                 style={{ objectFit: 'cover', borderRadius: '8px' }}
                                               /></td>
                 <td className="p-3 text-center">{decode(music.title)}</td>
                 <td className="p-3 text-center">{music.author}</td>
                 <td className="p-3 text-center">{music.word}</td>
                 <td className="p-3 text-center">
                   <button
-                    onClick={() => setPreviewVideo(music.videoId)}
+                    //onClick={() => setPreviewVideo(music.videoId)}
+                    onClick={() => {
+                      if (music.streamUrl) {
+                        setPreviewStreamUrl(music.streamUrl);
+                        setPreviewVideo(null);
+                      } else {
+                        setPreviewVideo(music.videoId);
+                        setPreviewStreamUrl(null);
+                      }
+                    }}
                     className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700"
                     title="영상 미리보기"
                   >
@@ -230,30 +247,47 @@ export default function MusicPageContent() {
           총 음악 건수: {musics.totalCount} 건
         </div>
 
-        {previewVideo && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-4 shadow-lg relative w-[90%] md:w-[720px]">
-              <button
-                className="absolute top-2 right-2 bg-white border border-gray-300 text-gray-600 hover:text-black px-2 py-1 rounded-full shadow"
-                onClick={() => setPreviewVideo(null)}
-              >
-                닫기 ✖️
-              </button>
+        {(previewVideo || previewStreamUrl) && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={closePlayer}
+        >
+          <div
+            className="bg-white rounded-lg p-4 shadow-lg relative w-[90%] md:w-[720px]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/*<button
+              className="absolute top-2 right-2 bg-white border border-gray-300 text-gray-600 hover:text-black px-2 py-1 rounded-full shadow"
+              onClick={closePlayer}
+            >
+              닫기 ✖️
+            </button>*/}
 
+            {/* R2 HLS 플레이어 */}
+            {previewStreamUrl && (
+              <HlsPlayer url={previewStreamUrl} />
+            )}
+
+            {/* YouTube 플레이어 */}
+            {previewVideo && (
               <YouTube
-                  videoId={previewVideo}
-                  opts={{
-                    playerVars: {
-                      autoplay: 1,
-                      rel: 0,
-                      modestbranding: 1,
-                      controls: 0,
-                    }
+                videoId={previewVideo}
+                opts={{
+                  width: "100%",
+                  playerVars: {
+                    autoplay: 1,
+                    rel: 0,
+                    modestbranding: 1,
+                    controls: 1,
+                  }
                 }}
               />
-            </div>
+            )}
+
           </div>
-        )}
+
+        </div>
+      )}
       </div>
     );
 }

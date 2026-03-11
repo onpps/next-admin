@@ -2,14 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { sweetToast } from '@/utils/sweetAlert';
+import { sweetToast } from "@/utils/sweetAlert";
 import { doLogin } from "@/api/LoginApi";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
 import { loginSuccess } from "../store/authSlice";
+import Link from "next/link"; // Link 컴포넌트 추가
 
 const initState = {
-  email: "",
+  id: "",
   password: "",
 };
 
@@ -20,39 +21,34 @@ export default function LoginPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setLoginParam(prev => ({ ...prev, [name]: value }));
+    setLoginParam((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!loginParam.email || !loginParam.password) {
+    if (!loginParam.id || !loginParam.password) {
       sweetToast("이메일과 비밀번호를 모두 입력하세요.");
       return;
     }
 
     try {
       const data = await doLogin(loginParam);
-      console.log("data =>", JSON.stringify(data));
-
       if (data.error) {
         sweetToast("로그인 정보가 올바르지 않습니다.");
         return;
       }
 
-      // roleNames 확인
       const roleNames = data.roleNames || [];
       if (roleNames.length === 1 && roleNames[0] === "USER") {
         sweetToast("로그인 권한이 없습니다.");
         return;
       }
 
-      // 정상 로그인 처리
       dispatch(loginSuccess(data));
       sweetToast("로그인 성공");
       router.push("/");
     } catch (error) {
-      console.log("error =>", JSON.stringify(error));
+      console.log(error);
       sweetToast("로그인 중 오류가 발생했습니다.");
     }
   };
@@ -61,27 +57,41 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
       <div className="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-sm">
         <h2 className="text-2xl font-bold text-white mb-6 text-center">관리자 로그인</h2>
-        <form onSubmit={handleLogin} className="flex flex-col gap-4 p-6 bg-gray-800 rounded-2xl">
+        <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <input
             type="text"
-            name="email"
-            value={loginParam.email}
+            name="id"
+            placeholder="아이디"
+            value={loginParam.id}
             onChange={handleChange}
-            placeholder="이메일"
-            className="p-2 rounded bg-gray-100"
+            className="p-3 rounded bg-gray-700 text-white outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
             type="password"
             name="password"
+            placeholder="비밀번호"
             value={loginParam.password}
             onChange={handleChange}
-            placeholder="비밀번호"
-            className="p-2 rounded bg-gray-100"
+            className="p-3 rounded bg-gray-700 text-white outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <button type="submit" className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition duration-300"
+          >
             로그인
-          </button> 
+          </button>
         </form>
+
+        {/* 아이디 찾기 및 비밀번호 변경 영역 (우측 정렬) */}
+        <div className="flex justify-end items-center mt-6 text-sm text-gray-400 gap-3">
+          <Link href="/findId" className="hover:text-white transition">
+            아이디 찾기
+          </Link>
+          <span className="text-gray-600 text-xs">|</span>
+          <Link href="/findPassword" className="hover:text-white transition">
+            비밀번호 변경하기
+          </Link>
+        </div>
       </div>
     </div>
   );

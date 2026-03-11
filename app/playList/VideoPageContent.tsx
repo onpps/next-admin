@@ -6,7 +6,8 @@ import PageComponent from "@/components/PageComponent";
 import useCustomMove from '@/utils/useCustomMove';
 import Swal from 'sweetalert2';
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
-import Button from '@/components/Button';
+//import Button from '@/components/Button';
+import { Button } from "@mui/material";
 import YouTube from 'react-youtube';
 import { Eye } from 'lucide-react';
 import Image from 'next/image';
@@ -71,6 +72,35 @@ export default function VideoPageContent() {
           console.error("에러 발생:", err);
         });
     };    
+
+    /* -------------------------
+         팟플레이어 재생 함수
+      -------------------------- */
+    const handlePlay = (item: MusicItem) => {
+      if (!item.videoId) {
+        alert("videoId가 없습니다.");
+        return;
+      }
+  
+      const url = `/player/${item.videoId}`;
+  
+      // location=no를 명시하고, toolbar와 status 등을 꺼줍니다.
+      const features = "width=1000,height=700,left=200,top=100,resizable=yes,location=no,toolbar=no,menubar=no,status=no";
+      
+      window.open(url, "storePlayer", features);
+  
+      //const youtubeUrl = `https://www.youtube.com/watch?v=${item.videoId}`;
+  
+      // 팟플레이어 실행
+      //window.location.href = `potplayer://${youtubeUrl}`;
+  
+      // UI 재생완료 처리
+      //setRequests((prev) =>
+        //prev.map((r) =>
+          ///r.mno === item.mno ? { ...r, playYn: "Y" } : r
+        //)
+      //);
+    };
 
 
     const handleStop = (mno: string) => {
@@ -279,6 +309,7 @@ export default function VideoPageContent() {
                 <th className="p-3">작가</th>
                 <th className="p-3">검색단어</th>
                 <th className="p-3">미리보기</th>
+                <th className="p-3">재생</th>
                 <th className="p-3">재생완료</th>
                 <th className="p-3">관리</th>
               </tr>
@@ -325,16 +356,28 @@ export default function VideoPageContent() {
                                 )}
                               </td>
                               <td className="p-3 text-center">
+                                <Button
+                                  variant="contained"
+                                  color="success"
+                                  disabled={music.playYn === "Y"}
+                                  onClick={() => handlePlay(music)}
+                                >
+                                  ▶ 재생
+                                </Button>
+                              </td>
+                              <td className="p-3 text-center">
                                 {music.playYn !== 'Y' && (
                                   <Button
-                                    variant={music.cancelYn === 'Y' ? 'danger' : 'primary'}
-                                    label={music.cancelYn === 'Y' ? '사용재개' : '거절'}
+                                    variant="contained"
+                                    color={music.cancelYn === 'Y' ? 'error' : 'primary'}
                                     onClick={() =>
                                       music.cancelYn === 'Y'
                                         ? handleResume(music.mno)
                                         : handleStop(music.mno)
                                     }
-                                  />
+                                  >
+                                    {music.cancelYn === 'Y' ? '사용재개' : '거절'}
+                                  </Button>
                                 )}
                               </td>
                               <td>

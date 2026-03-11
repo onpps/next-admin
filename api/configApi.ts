@@ -8,6 +8,12 @@ interface configParam {
   searchSource: string;
 }
 
+interface passwordParam {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 interface configResponse {
   errorCode?: string;
   errorMessage?: string;
@@ -33,3 +39,14 @@ export const saveConfig = async (param: configParam): Promise<configResponse> =>
     throw error;
   }
 };
+
+export const changePassword = async (param: passwordParam): Promise<configResponse> => {
+  try {
+    const res = await jwtAxios.post<configResponse>(`${host}/changePassword`, param);
+    return res.data;
+  } catch (error) {
+    console.error('saveConfig error:', error);
+    throw error;
+  }
+};
+

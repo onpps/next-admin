@@ -24,7 +24,7 @@ export default function AdminDashboard() {
           setRequests(data.playList);
         }
       })
-      .catch((err) => console.error(err));
+      .catch((err) => console.log(err));
   }, []);
 
   /* -------------------------

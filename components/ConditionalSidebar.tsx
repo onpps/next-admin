@@ -7,10 +7,12 @@ export default function ConditionalSidebar() {
   const pathname = usePathname();
 
   const isLoginPage = pathname.startsWith("/login");
+  const isFindIdPage = pathname.startsWith("/findId");
+  const isFindPasswordPage = pathname.startsWith("/findPassword");
   const isPlayerPage = pathname.startsWith("/youtubeplayer");
 
   console.log("isLoginPage=>" + isLoginPage);
   console.log("isPlayerPage=>" + isPlayerPage);
 
-  return !isLoginPage && !isPlayerPage ? <Sidebar /> : null;
+  return !isLoginPage && !isFindIdPage && !isFindPasswordPage && !isPlayerPage ? <Sidebar /> : null;
 }
