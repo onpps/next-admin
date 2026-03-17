@@ -1,5 +1,5 @@
 import jwtAxios from "../utils/jwtUtil";
-import { MemberListResponse, Member } from "../types/Member";
+import { Device } from "@/types/Device";
 //import { API_SERVER_HOST } from "@/utils/config";
 
 export const API_SERVER_HOST = process.env.NEXT_PUBLIC_API_SERVER_HOST;
@@ -14,15 +14,19 @@ interface PageParam {
   author?: string;
 }
 
-interface memberResponse {
+interface deviceResponse {
   errorCode?: string;
   errorMessage?: string;
   [key: string]: any;  // 응답이 확실하지 않다면 임시로 any 사용
 }
 
-interface userParam {
+interface Param {
   id: string;
   password: string;
+}
+
+interface deviceParam {
+  id: string;
 }
 
 interface limitParam {
@@ -31,7 +35,7 @@ interface limitParam {
 }
 
 //계정 리스트
-export async function getDeviceList(params: PageParam): Promise<Member[]> {
+export async function getDeviceList(params: PageParam): Promise<Device[]> {
   try {
 
     const response = await jwtAxios.get(`${host}/list`, {params: params});
@@ -41,18 +45,18 @@ export async function getDeviceList(params: PageParam): Promise<Member[]> {
     // 서버가 JSON 형식의 배열을 반환한다고 가정
     // const data: Music[] = response.data;
 
-    return response.data as Member[];
+    return response.data as Device[];
 
   } catch (error) {
-    console.error("계정 내역을 불러오는 중 오류 발생:", error);
+    console.error("디바이스 내역을 불러오는 중 오류 발생:", error);
     return []; // 오류 발생 시 빈 배열 반환
   }
 }
 
-//계정추가
-export const registerUser = async (param: userParam): Promise<memberResponse> => {
+//단말기 추가
+export const registerDivice = async (param: deviceParam): Promise<deviceResponse> => {
   try {
-    const res = await jwtAxios.post<memberResponse>(`${host}/registerUser`, param);
+    const res = await jwtAxios.post<deviceResponse>(`${host}/registerDevice`, param);
     return res.data;
   } catch (error) {
     console.error('registerUser error:', error);
@@ -60,21 +64,21 @@ export const registerUser = async (param: userParam): Promise<memberResponse> =>
   }
 };
 
-//비밀번호 변경
-export const changePassword = async (param: userParam): Promise<memberResponse> => {
+//단말기 삭제
+export const deleteDevice = async (id: string): Promise<deviceResponse> => {
   try {
-    const res = await jwtAxios.post<memberResponse>(`${host}/changePassword`, param);
+    const res = await jwtAxios.post<deviceResponse>(`${host}/deleteDevice`, id);
     return res.data;
   } catch (error) {
-    console.error('changePassword error:', error);
+    console.error('deleteDevice error:', error);
     throw error;
   }
 };
 
 //단말기계정 차단
-export const stopDevice = async (param: userParam): Promise<memberResponse> => {
+export const stopDevice = async (param: deviceParam): Promise<deviceResponse> => {
   try {
-    const res = await jwtAxios.post<memberResponse>(`${host}/stop`, param);
+    const res = await jwtAxios.post<deviceResponse>(`${host}/stop`, param);
     return res.data;
   } catch (error) {
     console.error('stopMember error:', error);
@@ -83,9 +87,9 @@ export const stopDevice = async (param: userParam): Promise<memberResponse> => {
 };
 
 //단말기계정 사용재개
-export const startDevice = async (param: userParam): Promise<memberResponse> => {
+export const startDevice = async (param: deviceParam): Promise<deviceResponse> => {
   try {
-    const res = await jwtAxios.post<memberResponse>(`${host}/start`, param);
+    const res = await jwtAxios.post<deviceResponse>(`${host}/start`, param);
     return res.data;
   } catch (error) {
     console.error('startMember error:', error);
@@ -94,9 +98,9 @@ export const startDevice = async (param: userParam): Promise<memberResponse> => 
 };
 
 //신청곡갯수 수정
-export const changeNumberOfSongLimit = async (param: limitParam): Promise<memberResponse> => {
+export const changeNumberOfSongLimit = async (param: limitParam): Promise<deviceResponse> => {
   try {
-    const res = await jwtAxios.post<memberResponse>(`${host}/changeNumberOfSongLimit`, param);
+    const res = await jwtAxios.post<deviceResponse>(`${host}/changeNumberOfSongLimit`, param);
     return res.data;
   } catch (error) {
     console.error('changeNumberOfSongLimit error:', error);

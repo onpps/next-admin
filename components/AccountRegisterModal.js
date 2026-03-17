@@ -1,7 +1,7 @@
 // components/AccountRegisterModal.js
 import { useState } from "react";
 import { sweetAlert } from '@/utils/sweetAlert';
-import { registerUser } from "@/api/deviceApi";
+//import { registerUser } from "@/api/deviceApi";
 
 export default function AccountRegisterModal({ visible, onRefresh, onClose }) {
   const [loading, setLoading] = useState(false);
@@ -44,9 +44,9 @@ export default function AccountRegisterModal({ visible, onRefresh, onClose }) {
     setLoading(true);
     try {
 
-      const data = await registerUser(form);
+      //const data = await registerUser(form);
       
-      console.log("data=>" + JSON.stringify(data));
+      //console.log("data=>" + JSON.stringify(data));
 
       /*if (data.errorCode === 'idIsEmpty') {
         sweetAlert('아이디 정보가 없습니다.', '', 'info', '닫기');

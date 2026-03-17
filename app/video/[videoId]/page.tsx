@@ -33,7 +33,7 @@ export default function VideoPage() {
     if (videoDetail?.videoId) {
       router.replace(`/video/${videoDetail.videoId}`);
     }
-  }, [videoDetail]);
+  }, [videoDetail, router]);
 
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%', maxWidth: 800 }}>

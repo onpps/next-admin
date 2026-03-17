@@ -1,17 +1,17 @@
 'use client';
 import React, { useState } from 'react';
-import { sweetToast } from '@/utils/sweetAlert';
-import { changePassword } from "@/api/deviceApi";
+//import { sweetToast } from '@/utils/sweetAlert';
+//import { changePassword } from "@/api/memberApi";
 
 interface Props {
   loginId: string;
   onClose: () => void;
 }
 
-interface userParam {
+/*interface userParam {
   id: string;
   password: string;
-}
+}*/
 
 const PasswordChangeForm: React.FC<Props> = ({ loginId, onClose }) => {
   const [loading, setLoading] = useState(false);
@@ -34,15 +34,16 @@ const PasswordChangeForm: React.FC<Props> = ({ loginId, onClose }) => {
 
     setLoading(true);
     setError('');
+    /*
     try {
-      /*const response = await fetch('/api/device/changePassword', {
+      const response = await fetch('/api/device/changePassword', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           loginId,
           newPassword,
         }),
-      });*/
+      });
       
       const param: userParam = {
         id: loginId,
@@ -63,7 +64,7 @@ const PasswordChangeForm: React.FC<Props> = ({ loginId, onClose }) => {
       setError('서버 오류:' + error);
     } finally {
       setLoading(false);
-    }
+    }*/
   };
 
   const inputStyle: React.CSSProperties = {

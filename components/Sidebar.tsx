@@ -53,8 +53,8 @@ export default function Sidebar() {
             </Link>
           </li>
         )}
-
-        <li><Link href="/member" className={menuClass('/member')}>계정 관리</Link></li>
+        <li><Link href="/device" className={menuClass('/device')}>단말기 관리</Link></li>
+       {/* <li><Link href="/member" className={menuClass('/member')}>계정 관리</Link></li> */}
         <li><Link href="/musics" className={menuClass('/musics')}>음악 관리</Link></li>
         <li><Link href="/playList" className={menuClass('/playList')}>플레이 리스트</Link></li>
         <li><Link href="/payment" className={menuClass('/payment')}>결제 관리</Link></li>

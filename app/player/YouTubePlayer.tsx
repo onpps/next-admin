@@ -63,8 +63,16 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, Props>(
             playsinline: 1,
           },
           events: {
-            onReady: () => {
+            onReady: (event: YT.PlayerEvent) => {
               isReady.current = true;
+
+              event.target.playVideo();
+
+              // 약간 딜레이 후 소리 켜기
+              setTimeout(() => {
+                event.target.unMute();
+                event.target.setVolume(100);
+              }, 500);
             },
             onStateChange: (event: YT.OnStateChangeEvent) => {
               if (event.data === window.YT.PlayerState.ENDED) {
@@ -84,15 +92,18 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, Props>(
       return () => {
         ytPlayer.current?.destroy();
       };
-    }, []); // 🔥 videoId 제거 (한 번만 생성)
+    }, [videoId, onEnded]); // 🔥 videoId 제거 (한 번만 생성)
 
     // 🔥 videoId 변경 시 기존 플레이어에 영상만 교체
     useEffect(() => {
+
+      console.log("videoId=>" + videoId);
+
       currentVideoIdRef.current = videoId;
 
-      if (isReady.current && ytPlayer.current) {
-        ytPlayer.current.loadVideoById(videoId);
-      }
+      //if (isReady.current && ytPlayer.current) {
+        //ytPlayer.current.loadVideoById(videoId);
+      //}
     }, [videoId]);
 
     return <div ref={playerRef} className="w-full h-full" />;

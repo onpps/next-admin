@@ -70,11 +70,14 @@ export default function Page() {
       ref={containerRef}
       className="fixed inset-0 w-screen h-screen bg-black"
     >
-     <YouTubePlayer
-      ref={playerRef}
-      videoId={videoId}
-      onEnded={handleVideo}
-    />
+      {/* started 이후에만 Player 생성 */}
+      {started && (
+        <YouTubePlayer
+          ref={playerRef}
+          videoId={videoId}
+          onEnded={handleVideo}
+        />
+      )}
 
       {!started && (
         <div className="absolute inset-0 flex items-center justify-center bg-black z-50">

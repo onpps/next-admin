@@ -3,19 +3,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import useCustomMove from "@/utils/useCustomMove";
-import AccountRegisterModal from '@/components/AccountRegisterModal';
-import PasswordChangeForm from "@/components/PasswordChangeForm";
+import DeviceRegisterModal from '@/components/DeviceRegisterModal';
+//import PasswordChangeForm from "@/components/PasswordChangeForm";
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button
 } from '@mui/material';
 import CustomStepper from "@/components/CustomStepper";
 import { getDeviceList, startDevice, stopDevice, changeNumberOfSongLimit } from '../../api/deviceApi';
-import { Device } from '../../types/Device';
+import { Device } from '@/types/Device';
 
-interface userParam {
+interface deviceParam {
   id: string;
-  password: string;
 }
 
 interface limitParam {
@@ -25,8 +24,6 @@ interface limitParam {
 }
 
 export default function UsersPageContent() {
-  const [pwModalOpen, setPwModalOpen] = useState(false);
-  const [selectedLoginId, setSelectedLoginId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { page, size } = useCustomMove();
@@ -37,26 +34,21 @@ export default function UsersPageContent() {
       const data = await getDeviceList({ page, size });
       setDevices(data);
     } catch (error) {
-      console.log("멤버 데이터를 불러오는 중 에러 발생:", error);
+      console.log("단말기 데이터를 불러오는 중 에러 발생:", error);
       alert("서버 통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
     }
   }, [page, size]); 
 
-  const handlePwChange = (memberId: string) => {
-    setSelectedLoginId(memberId);
-    setPwModalOpen(true);
-  };
-
   const handleStop = (deviceId: string) => {
-    sweetConfirm(`${deviceId} 계정을 차단 하시겠습니까?`, 'question', async () => {
-      const param: userParam = { id: deviceId, password: '' };
+    sweetConfirm(`단말기를 차단 하시겠습니까?`, 'question', async () => {
+      const param: deviceParam = { id: deviceId };
       try {
         const data = await stopDevice(param);
         if (data.errorCode === 'notExist') {
           sweetAlert(data.errorMessage, '', 'info', '닫기');
           return;
         }
-        sweetToast('계정이 차단 되었습니다.\n차단된 계정은 음악신청이 불가합니다.');
+        sweetToast('단말기가 차단 되었습니다.\n차단된 계정은 음악신청이 불가합니다.');
         loadDeviceList();
       } catch (error) {
         alert("오류발생:" + error);
@@ -65,15 +57,15 @@ export default function UsersPageContent() {
   };
 
   const handleResume = (deviceId: string) => {
-    sweetConfirm(`${deviceId} 계정을 사용재개 하시겠습니까?`, 'question', async () => {
-      const param: userParam = { id: deviceId, password: '' };
+    sweetConfirm(`단말기를 사용재개 하시겠습니까?`, 'question', async () => {
+      const param: deviceParam = { id: deviceId };
       try {
         const data = await startDevice(param);
         if (data.errorCode === 'notExist') {
           sweetAlert(data.errorMessage, '', 'info', '닫기');
           return;
         }
-        sweetToast('계정이 사용재개 되었습니다.\n음악신청 가능합니다.');
+        sweetToast('단말기가 사용재개 되었습니다.\n음악신청 가능합니다.');
         loadDeviceList();
       } catch (error) {
         alert("오류발생:" + error);
@@ -81,12 +73,12 @@ export default function UsersPageContent() {
     });
   };
 
-  const handleValueChange = async (memberId: string, storeId: string, newValue: number) => {
-    console.log("memberId:", memberId);
+  const handleValueChange = async (id: string, storeId: string, newValue: number) => {
+    console.log("id", id);
     console.log("storeId:", storeId);  
     console.log("변경된 값:", newValue);
 
-      const param: limitParam = { id: memberId, storeId: storeId, numberOfSongLimit: newValue };
+      const param: limitParam = { id: id, storeId: storeId, numberOfSongLimit: newValue };
       try {
         const data = await changeNumberOfSongLimit(param);
         console.log("data=>" + JSON.stringify(data));
@@ -107,7 +99,7 @@ export default function UsersPageContent() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-4 text-white">계정 관리</h1>
+      <h1 className="text-2xl font-semibold mb-4 text-white">단말기 관리</h1>
 
       <div className="border border-gray-300 rounded p-4 mb-6 bg-white shadow">
         <div className="grid grid-cols-1">
@@ -116,7 +108,7 @@ export default function UsersPageContent() {
               onClick={() => setIsModalOpen(true)}
               className="bg-blue-500 text-white rounded p-2 hover:bg-blue-600 flex items-center gap-1"
             >
-              ➕ 계정추가
+              ➕ 단말기 등록
             </button>
           </div>
         </div>
@@ -126,7 +118,7 @@ export default function UsersPageContent() {
         <Table sx={{ minWidth: 1200 }} aria-label="Member Table">
           <TableHead>
             <TableRow>
-              {['매장아이디', '테이블번호', '계정아이디', '현재신청갯수', '신청가능갯수', '등록일', '비밀번호', '차단'].map((title) => (
+              {['테이블', '단말기 이름', '페어링 코드', '상태', '신청갯수' , '신청가능갯수', '등록일', '관리'].map((title) => (
                 <TableCell key={title} align="center" sx={{ fontWeight: 'bold' }}>
                   {title}
                 </TableCell>
@@ -136,24 +128,21 @@ export default function UsersPageContent() {
           <TableBody>
             {devices?.map((device: Device) => (
               <TableRow key={device.id}>
-                <TableCell align="center">{device.storeId}</TableCell>
                 <TableCell align="center">{device.tableNo}</TableCell>
-                <TableCell align="center">{device.id}</TableCell>
+                <TableCell align="center">{device.deviceName}</TableCell>
+                <TableCell align="center">{device.pairCode}</TableCell>
+                <TableCell align="center">
+                    {device.paired ? (
+                      <span className="text-green-500">● 온라인</span>
+                    ) : (
+                      <span className="text-gray-400">● 미등록</span>
+                    )}
+                </TableCell>
                 <TableCell align="center">{device.numberOfSongRequests}</TableCell>
                 <TableCell align="center">
                   <CustomStepper value={device.numberOfSongLimit} onChange={(newValue) => handleValueChange(device.id, device.storeId, newValue)} />
                 </TableCell>
                 <TableCell align="center">{device.regDate}</TableCell>
-                <TableCell align="center">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => handlePwChange(device.id)}
-                  >
-                    변경
-                  </Button>
-                </TableCell>
                 <TableCell align="center">
                   <Button
                     variant="contained"
@@ -172,24 +161,12 @@ export default function UsersPageContent() {
         </Table>
       </TableContainer>
 
-      <AccountRegisterModal
+      <DeviceRegisterModal
         visible={isModalOpen}
         onRefresh={() => loadDeviceList()}
         onClose={() => setIsModalOpen(false)}
       />
-      {pwModalOpen && selectedLoginId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded p-6">
-            <PasswordChangeForm
-              loginId={selectedLoginId}
-              onClose={() => {
-                setPwModalOpen(false);
-                setSelectedLoginId(null);
-              }}
-            />
-          </div>
-        </div>
-      )}
+  
     </div>
   );
 }
