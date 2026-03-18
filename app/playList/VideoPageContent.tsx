@@ -114,6 +114,7 @@ export default function VideoPageContent() {
           input: 'select',
           inputOptions: {
             '분위기에 어울리지 않는 곡': '분위기에 어울리지 않는 곡',
+            '재생 불가능한 영상': '재생 불가능한 영상',
             '가사 부적절': '가사 부적절',
             '기타': '기타',
           },

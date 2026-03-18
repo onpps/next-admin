@@ -107,3 +107,15 @@ export const changeNumberOfSongLimit = async (param: limitParam): Promise<device
     throw error;
   }
 };
+
+
+//단말기계정 신청갯수 초기화
+export const resetNumberOfSongRequests = async (param: deviceParam): Promise<deviceResponse> => {
+  try {
+    const res = await jwtAxios.put<deviceResponse>(`${host}/resetNumberOfSongRequests`, param);
+    return res.data;
+  } catch (error) {
+    console.error('resetNumberOfSongRequests error:', error);
+    throw error;
+  }
+};

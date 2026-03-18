@@ -6,11 +6,9 @@ import useCustomMove from "@/utils/useCustomMove";
 import DeviceRegisterModal from '@/components/DeviceRegisterModal';
 //import PasswordChangeForm from "@/components/PasswordChangeForm";
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
-import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button
-} from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Tooltip } from '@mui/material';
 import CustomStepper from "@/components/CustomStepper";
-import { getDeviceList, startDevice, stopDevice, changeNumberOfSongLimit } from '../../api/deviceApi';
+import { getDeviceList, startDevice, stopDevice, changeNumberOfSongLimit, resetNumberOfSongRequests } from '../../api/deviceApi';
 import { Device } from '@/types/Device';
 
 interface deviceParam {
@@ -93,6 +91,25 @@ export default function UsersPageContent() {
       }
   };
 
+  const handleResetCount = (deviceId: string) => {
+    sweetConfirm(`신청곡 갯수를 초기화 하시겠습니까?`, 'question', async () => {
+      try {
+        const param: deviceParam = { id: deviceId };
+        const data = await resetNumberOfSongRequests(param);
+
+        if (data.errorCode === 'notExist' || data.errorCode === 'authFail') {
+          sweetAlert(data.errorMessage, '', 'info', '닫기');
+          return;
+        }
+
+        sweetToast('신청곡 갯수가 초기화되었습니다.');
+        loadDeviceList();
+      } catch (error) {
+        alert("오류발생:" + error);
+      }
+    });
+  };
+
   useEffect(() => {
     loadDeviceList();
   }, [loadDeviceList]);
@@ -118,7 +135,7 @@ export default function UsersPageContent() {
         <Table sx={{ minWidth: 1200 }} aria-label="Member Table">
           <TableHead>
             <TableRow>
-              {['테이블', '단말기 이름', '페어링 코드', '상태', '신청갯수' , '신청가능갯수', '등록일', '관리'].map((title) => (
+              {['테이블', '단말기 이름', '페어링 코드', '상태', '신청곡갯수' , '신청가능갯수', '등록일', '관리'].map((title) => (
                 <TableCell key={title} align="center" sx={{ fontWeight: 'bold' }}>
                   {title}
                 </TableCell>
@@ -144,16 +161,29 @@ export default function UsersPageContent() {
                 </TableCell>
                 <TableCell align="center">{device.regDate}</TableCell>
                 <TableCell align="center">
-                  <Button
-                    variant="contained"
-                    color={device.useYn === 'N' ? 'success' : 'error'}
-                    size="small"
-                    onClick={() =>
-                      device.useYn === 'N' ? handleResume(device.id) : handleStop(device.id)
-                    }
-                  >
-                    {device.useYn === 'N' ? '해제' : '차단'}
-                  </Button>
+                  <div className="flex justify-center gap-2">
+                    <Tooltip title="신청곡 갯수 0으로 초기화" arrow>
+                      <Button
+                        variant="contained"
+                        color="warning"
+                        size="small"
+                        onClick={() => handleResetCount(device.id)}
+                      >
+                        초기화
+                      </Button>
+                    </Tooltip>
+
+                    <Button
+                      variant="contained"
+                      color={device.useYn === 'N' ? 'success' : 'error'}
+                      size="small"
+                      onClick={() =>
+                        device.useYn === 'N' ? handleResume(device.id) : handleStop(device.id)
+                      }
+                    >
+                      {device.useYn === 'N' ? '해제' : '차단'}
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
