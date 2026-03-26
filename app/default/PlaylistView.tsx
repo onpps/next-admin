@@ -168,14 +168,13 @@ export default function PlaylistView({ items, openPreview }: Props) {
                   >
 
                     {/* 🎬 썸네일 */}
-                    <Box position="relative">
+                    <Box sx={{ position: "relative", width: "100%", height: 150 }}>
                       <Image
                         src={item.thumbnail}
                         alt=""
-                        width={100}
-                        height={80}
+                        fill
                         style={{ objectFit: "cover" }}
-                      />
+                     />
 
                       {/* ▶ 오버레이 재생 버튼 */}
                       <Box
