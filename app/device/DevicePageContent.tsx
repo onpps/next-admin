@@ -8,7 +8,7 @@ import DeviceRegisterModal from '@/components/DeviceRegisterModal';
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Tooltip } from '@mui/material';
 import CustomStepper from "@/components/CustomStepper";
-import { getDeviceList, startDevice, stopDevice, changeNumberOfSongLimit, resetNumberOfSongRequests } from '../../api/deviceApi';
+import { getDeviceList, startDevice, stopDevice, changeNumberOfSongLimit, resetNumberOfSongRequests } from '@/api/deviceApi';
 import { Device } from '@/types/Device';
 
 interface deviceParam {

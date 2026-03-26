@@ -28,7 +28,7 @@ export default function AdminDashboard() {
   }, []);
 
   /* -------------------------
-     팟플레이어 재생 함수
+     플레이어 재생 함수
   -------------------------- */
   const handlePlay = (item: PlayList) => {
     if (!item.videoId) {

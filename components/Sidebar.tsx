@@ -56,9 +56,10 @@ export default function Sidebar() {
         <li><Link href="/device" className={menuClass('/device')}>단말기 관리</Link></li>
        {/* <li><Link href="/member" className={menuClass('/member')}>계정 관리</Link></li> */}
         <li><Link href="/musics" className={menuClass('/musics')}>음악 관리</Link></li>
-        <li><Link href="/playList" className={menuClass('/playList')}>플레이 리스트</Link></li>
+        <li><Link href="/playList" className={menuClass('/playList')}>신청곡 리스트</Link></li>
         <li><Link href="/payment" className={menuClass('/payment')}>결제 관리</Link></li>
         <li><Link href="/history" className={menuClass('/history')}>로그인 이력 관리</Link></li>
+        <li><Link href="/default" className={menuClass('/default')}>기본 재생목록 설정</Link></li>
         <li><Link href="/config" className={menuClass('/config')}>환경 설정</Link></li>
       </ul>
     </aside>

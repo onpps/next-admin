@@ -7,15 +7,15 @@ import YouTubePlayer, {
 } from "../YouTubePlayer";
 import { getMusicItem } from "@/api/musicApi";
 
-interface VideoDetail {
+/*interface VideoDetail {
   videoId: string;
-}
+}*/
 
 export default function Page() {
   const params = useParams();
   const initialVideoId = params.videoId as string;
 
-  const [videoDetail, setVideoDetail] = useState<VideoDetail | null>(null);
+  //const [videoDetail, setVideoDetail] = useState<VideoDetail | null>(null);
   
   const [videoId, setVideoId] = useState<string>("");
   const [started, setStarted] = useState(false);
@@ -29,13 +29,13 @@ export default function Page() {
     }
   }, [initialVideoId]);
 
-  useEffect(() => {
+ /*useEffect(() => {
     console.log("videoDetail=>" + JSON.stringify(videoDetail));
     if (videoDetail) {
       setVideoId(videoDetail.videoId);
       //playerRef.current?.loadVideo(videoDetail.videoId);
     }
-  }, [videoDetail]);
+  }, [videoDetail]);*/
 
   const enterFullscreen = async () => {
     if (!containerRef.current) return;
@@ -54,8 +54,19 @@ export default function Page() {
     if (videoId) {
       getMusicItem(videoId)
         .then(data => {
-          console.log("data => " + JSON.stringify(data));
-          setVideoDetail(data);
+          console.log("data=>" + JSON.stringify(data));
+
+          // 기본 재생목록 없을 경우 → 팝업 닫기
+          if (data.type === "NOTEXIST") {
+            console.log("기본 재생목록 없음 → 창 닫기");
+
+            window.close(); // 여기 추가
+
+            return;
+          }
+
+          // 정상일 경우 다음 영상 재생
+          setVideoId(data.videoId);
         })
         .catch(err => console.log(err));
     }
@@ -76,6 +87,7 @@ export default function Page() {
           ref={playerRef}
           videoId={videoId}
           onEnded={handleVideo}
+          onError={handleVideo}
         />
       )}
 

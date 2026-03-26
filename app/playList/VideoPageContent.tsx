@@ -74,8 +74,8 @@ export default function VideoPageContent() {
     };    
 
     /* -------------------------
-         팟플레이어 재생 함수
-      -------------------------- */
+        플레이어 재생 함수
+    -------------------------- */
     const handlePlay = (item: MusicItem) => {
       if (!item.videoId) {
         alert("videoId가 없습니다.");
@@ -261,7 +261,7 @@ export default function VideoPageContent() {
         
     return (
       <div>
-        <h1 className="text-2xl font-semibold mb-4 text-white">플레이 리스트</h1>
+        <h1 className="text-2xl font-semibold mb-4 text-white">신청곡 리스트</h1>
 
         {/* 🔍 검색 폼 : 테두리 + 여백 + 정리된 UI */}
         <div className="border border-gray-300 rounded p-4 mb-6 bg-white shadow">
@@ -363,7 +363,7 @@ export default function VideoPageContent() {
                                   disabled={music.playYn === "Y"}
                                   onClick={() => handlePlay(music)}
                                 >
-                                  ▶ 재생
+                                  재생
                                 </Button>
                               </td>
                               <td className="p-3 text-center">
@@ -400,7 +400,7 @@ export default function VideoPageContent() {
                 ) : (
                   <tr>
                     <td colSpan={9} className="p-5 text-center text-gray-400">
-                      플레이 리스트가 없습니다.
+                      신청곡 리스트가 없습니다.
                     </td>
                   </tr>
                 )}
@@ -455,7 +455,7 @@ export default function VideoPageContent() {
               </tr>
                ))
             ) : (
-              <tr><td colSpan={7} className="text-center py-10 text-gray-500">플레이 리스트 내역이 없습니다.</td></tr>
+              <tr><td colSpan={7} className="text-center py-10 text-gray-500">신청곡 리스트 내역이 없습니다.</td></tr>
             )}
           </tbody>
         </table>*/}

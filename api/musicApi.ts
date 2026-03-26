@@ -65,7 +65,7 @@ export async function fetchMusics(params: PageParam): Promise<MusicListResponse>
   }
 }
 
-//플레이 리스트
+//신청곡 리스트
 export async function fetchPlayList(params: PageParam): Promise<PlayListResponse> {
   try {
 

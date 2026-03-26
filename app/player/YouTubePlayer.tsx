@@ -10,6 +10,7 @@ import {
 interface Props {
   videoId: string;
   onEnded?: (videoId: string) => void;
+  onError?: (videoId: string) => void;
 }
 
 export interface YouTubePlayerHandle {
@@ -25,7 +26,7 @@ declare global {
 }
 
 const YouTubePlayer = forwardRef<YouTubePlayerHandle, Props>(
-  ({ videoId, onEnded }, ref) => {
+  ({ videoId, onEnded, onError}, ref) => {
     const playerRef = useRef<HTMLDivElement | null>(null);
     const ytPlayer = useRef<YT.Player>(null);
     const isReady = useRef(false);
@@ -79,6 +80,13 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, Props>(
                 onEnded?.(currentVideoIdRef.current);
               }
             },
+            // 재생 불가 대응
+            onError: (event: YT.OnErrorEvent) => {
+              console.log("❌ 영상 에러 발생:", event.data);
+
+              // 101,150 = 외부재생 차단 / 100 삭제 / 2 잘못된 ID
+              onError?.(currentVideoIdRef.current);
+            },
           },
         });
       };
@@ -92,7 +100,7 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, Props>(
       return () => {
         ytPlayer.current?.destroy();
       };
-    }, [videoId, onEnded]); // 🔥 videoId 제거 (한 번만 생성)
+    }, [videoId, onEnded, onError]); // 🔥 videoId 제거 (한 번만 생성)
 
     // 🔥 videoId 변경 시 기존 플레이어에 영상만 교체
     useEffect(() => {
