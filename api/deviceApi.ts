@@ -119,3 +119,14 @@ export const resetNumberOfSongRequests = async (param: deviceParam): Promise<dev
     throw error;
   }
 };
+
+//현재 연결된 태블릿 연결 해제
+export const unpairDevice = async (param: deviceParam): Promise<deviceResponse> => {
+  try {
+    const res = await jwtAxios.post<deviceResponse>(`${host}/unpair`, param);
+    return res.data;
+  } catch (error) {
+    console.error('unpairDevice error:', error);
+    throw error;
+  }
+};

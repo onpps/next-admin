@@ -33,6 +33,9 @@ export default function LoginPage() {
 
     try {
       const data = await doLogin(loginParam);
+
+      console.log("data=>" + JSON.stringify(data));
+
       if (data.error) {
         sweetToast("로그인 정보가 올바르지 않습니다.");
         return;

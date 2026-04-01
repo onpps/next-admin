@@ -2,17 +2,20 @@
 'use client';
 
 import { useCallback, useEffect, useState } from "react";
+import SockJS from "sockjs-client";
+import { Client, IMessage } from "@stomp/stompjs";
 import useCustomMove from "@/utils/useCustomMove";
 import DeviceRegisterModal from '@/components/DeviceRegisterModal';
 //import PasswordChangeForm from "@/components/PasswordChangeForm";
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Tooltip } from '@mui/material';
 import CustomStepper from "@/components/CustomStepper";
-import { getDeviceList, startDevice, stopDevice, changeNumberOfSongLimit, resetNumberOfSongRequests } from '@/api/deviceApi';
+import { getDeviceList, startDevice, stopDevice, changeNumberOfSongLimit, resetNumberOfSongRequests, unpairDevice } from '@/api/deviceApi';
 import { Device } from '@/types/Device';
 
 interface deviceParam {
   id: string;
+  storeId: string;
 }
 
 interface limitParam {
@@ -37,9 +40,9 @@ export default function UsersPageContent() {
     }
   }, [page, size]); 
 
-  const handleStop = (deviceId: string) => {
+  const handleStop = (deviceId: string, storeId: string) => {
     sweetConfirm(`단말기를 차단 하시겠습니까?`, 'question', async () => {
-      const param: deviceParam = { id: deviceId };
+      const param: deviceParam = { id: deviceId, storeId: storeId };
       try {
         const data = await stopDevice(param);
         if (data.errorCode === 'notExist') {
@@ -54,9 +57,9 @@ export default function UsersPageContent() {
     });
   };
 
-  const handleResume = (deviceId: string) => {
+  const handleResume = (deviceId: string, storeId: string) => {
     sweetConfirm(`단말기를 사용재개 하시겠습니까?`, 'question', async () => {
-      const param: deviceParam = { id: deviceId };
+      const param: deviceParam = { id: deviceId, storeId: storeId };
       try {
         const data = await startDevice(param);
         if (data.errorCode === 'notExist') {
@@ -91,10 +94,10 @@ export default function UsersPageContent() {
       }
   };
 
-  const handleResetCount = (deviceId: string) => {
+  const handleResetCount = (deviceId: string, storeId: string) => {
     sweetConfirm(`신청곡 갯수를 초기화 하시겠습니까?`, 'question', async () => {
       try {
-        const param: deviceParam = { id: deviceId };
+        const param: deviceParam = { id: deviceId, storeId: storeId };
         const data = await resetNumberOfSongRequests(param);
 
         if (data.errorCode === 'notExist' || data.errorCode === 'authFail') {
@@ -110,9 +113,76 @@ export default function UsersPageContent() {
     });
   };
 
+  const handleUnpair = async (deviceId : string, storeId : string) => {
+    sweetConfirm(`연결 해제하시겠습니까?`, 'question', async () => {
+      try {
+       /* await fetch("/api/device/unpair", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ deviceId }),
+        }); */
+
+        const param: deviceParam = { id: deviceId, storeId: storeId };
+        const data = await unpairDevice(param);
+
+        console.log("data=>" + data);
+
+        sweetAlert("연결 해제 완료", "", "success", "닫기");
+        loadDeviceList();
+      } catch (e) {
+        console.log(e);
+        sweetAlert("연결 해제 실패", "", "error", "닫기");
+      }
+    });
+  };
+
+  useEffect(() => {
+    const client = new Client({
+      webSocketFactory: () => new SockJS("https://music-q.co.kr/ws-device"),
+      reconnectDelay: 5000,
+    });
+
+    client.onConnect = () => {
+      client.subscribe("/topic/device", (message: IMessage) => {
+        const data = JSON.parse(message.body);
+
+        console.log("data=>" + JSON.stringify(data));
+
+        if (data.type === "PAIRING_SUCCESS") {
+          setDevices((prev) =>
+            prev?.map((d) =>
+              d.id === data.deviceId
+                ? { ...d, paired: true }
+                : d
+            )
+          );
+        }
+
+        if (data.type === "UNPAIR") {
+          setDevices((prev) =>
+            prev?.map((d) =>
+              d.id === data.deviceId
+                ? { ...d, paired: false }
+                : d
+            )
+          );
+        }
+      });
+    };
+
+    client.activate();
+
+    return () => {
+      client.deactivate();
+    };
+  }, []);
+
   useEffect(() => {
     loadDeviceList();
   }, [loadDeviceList]);
+
 
   return (
     <div>
@@ -167,22 +237,38 @@ export default function UsersPageContent() {
                         variant="contained"
                         color="warning"
                         size="small"
-                        onClick={() => handleResetCount(device.id)}
+                        onClick={() => handleResetCount(device.id, device.storeId)}
                       >
-                        초기화
+                       신청곡 갯수 초기화
                       </Button>
                     </Tooltip>
 
-                    <Button
-                      variant="contained"
-                      color={device.useYn === 'N' ? 'success' : 'error'}
-                      size="small"
-                      onClick={() =>
-                        device.useYn === 'N' ? handleResume(device.id) : handleStop(device.id)
-                      }
-                    >
-                      {device.useYn === 'N' ? '해제' : '차단'}
-                    </Button>
+                    {/* 🔥 추가된 부분 */}
+                    {device.paired && (
+                      <Tooltip title="현재 연결된 태블릿 연결 해제" arrow>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          size="small"
+                          onClick={() => handleUnpair(device.id, device.storeId)}
+                        >
+                          연결해제
+                        </Button>
+                      </Tooltip>
+                    )}
+
+                    <Tooltip title="태블릿 신청곡 차단" arrow>
+                      <Button
+                        variant="contained"
+                        color={device.useYn === 'N' ? 'success' : 'error'}
+                        size="small"
+                        onClick={() =>
+                          device.useYn === 'N' ? handleResume(device.id, device.storeId) : handleStop(device.id, device.storeId)
+                        }
+                      >
+                        {device.useYn === 'N' ? '해제' : '차단'}
+                      </Button>
+                    </Tooltip>
                   </div>
                 </TableCell>
               </TableRow>
