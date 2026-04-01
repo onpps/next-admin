@@ -151,23 +151,11 @@ export default function UsersPageContent() {
         console.log("data=>" + JSON.stringify(data));
 
         if (data.type === "PAIRING_SUCCESS") {
-          setDevices((prev) =>
-            prev?.map((d) =>
-              d.id === data.deviceId
-                ? { ...d, paired: true }
-                : d
-            )
-          );
+          loadDeviceList();
         }
 
         if (data.type === "UNPAIR") {
-          setDevices((prev) =>
-            prev?.map((d) =>
-              d.id === data.deviceId
-                ? { ...d, paired: false }
-                : d
-            )
-          );
+          loadDeviceList();
         }
       });
     };
