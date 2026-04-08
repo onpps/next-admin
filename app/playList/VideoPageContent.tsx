@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import SockJS from "sockjs-client";
+import { Client, IMessage } from "@stomp/stompjs";
 import { useRouter } from 'next/navigation';
 import { fetchPlayList, stopMusicItem, startMusicItem, updateNewSort } from '../../api/musicApi';
 import { PlayListResponse, MusicItem } from '../../types/Music';
@@ -157,7 +159,6 @@ export default function VideoPageContent() {
       });
     };
 
-
     const handleResume = (mno: string) => {
     
       console.log(`mno => ${mno}`);
@@ -208,10 +209,34 @@ export default function VideoPageContent() {
         });
     }, [page, size, searchParams]);
     
-
     useEffect(() => {
       console.log("playListData=>" + JSON.stringify(musicItems));
     }, [musicItems]);
+
+    useEffect(() => {
+        const client = new Client({
+          webSocketFactory: () => new SockJS("https://music-q.co.kr/ws-play"),
+          reconnectDelay: 5000,
+        });
+    
+        client.onConnect = () => {
+          client.subscribe("/topic/play", (message: IMessage) => {
+            const data = JSON.parse(message.body);
+    
+            console.log("data=>" + JSON.stringify(data));
+    
+            if (data.type === "PLAY_SUCCESS") {
+              fetchPlayList({ page, size, ...searchParams }).then(setMusicItems);
+            }
+          });
+        };
+    
+        client.activate();
+    
+        return () => {
+          client.deactivate();
+        };
+    }, [page, size, searchParams]);
 
     /*useEffect(() => {
       if (previewVideo) {

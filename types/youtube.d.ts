@@ -8,8 +8,22 @@ declare namespace YT {
     destroy(): void;
   }
 
+  interface PlayerEvent {
+    target: Player;
+  }
+
+  interface PlayerStateChangeEvent {
+    data: number;
+    target: Player;
+  }
+
   interface OnStateChangeEvent {
     data: number;
+  }
+
+  interface OnErrorEvent {
+    data: number;
+    target: any;
   }
 
   const PlayerState: {

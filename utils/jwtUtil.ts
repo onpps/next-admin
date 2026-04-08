@@ -94,21 +94,28 @@ const responseFail = (error: any) => {
   console.log("response fail error.............");
   console.log("error=>" + JSON.stringify(error));
 
-  const errorMsg = error.response.data.error;
+  const errorMsg = error?.response?.data?.error || "Unknown error";
 
   console.log("errorMsg=>" + errorMsg);
 
-  if(errorMsg === 'REQUIRE_LOGIN'){
-    sweetToast('로그인 해야만 합니다.');
-    window.location.href = "/login";
+  if (errorMsg === 'REQUIRE_LOGIN') {
+    //서버에서는 실행 안되게
+    if (typeof window !== 'undefined') {
+      sweetToast('로그인 해야만 합니다.');
+      window.location.href = "/login";
+    }
 
-    return
+    return Promise.reject(error);
   }
 
   //인증에러나 Expired일 경우
   if(error.status === 401){
-    sweetToast('로그인 정보가 만료되었습니다.');
-    window.location.href = "/login";
+    if (typeof window !== 'undefined') {
+      sweetToast('로그인 정보가 만료되었습니다.');
+      window.location.href = "/login";
+    }
+
+     return Promise.reject(error);
   }
 
   return Promise.reject(error);
