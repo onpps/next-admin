@@ -27,9 +27,10 @@ import {
 } from '@mui/material';
 import CloseIcon from "@mui/icons-material/Close";
 //import { filterChannels } from '@/utils/filterChannels';
-import { getArtistList } from '@/api/channel';
+import { deleteChannel, getArtistList } from '@/api/channel';
 import { Channel } from "@/types/Channel";
 import { RAPID_API_KEY } from '@/utils/config';
+import { sweetAlert, sweetConfirm } from '@/utils/sweetAlert'; 
 
 type Artist = {
   id : number;
@@ -246,7 +247,7 @@ export default function ChannelAdminPage() {
     console.log("selected.length=>" + selected.length);
 
     if (selected.length === 0) {
-      alert('선택된 항목이 없습니다.');
+      sweetAlert('선택된 항목 없음', '최소 1개 이상의 영상을 선택해주세요.', 'info', '닫기');
       return;
     }
 
@@ -275,7 +276,8 @@ export default function ChannelAdminPage() {
         // TODO: DB 저장
        // await registerArtist(param);
 
-      alert('저장 완료');
+      //alert('저장 완료');
+      sweetAlert('저장 완료', '저장 완료 하였습니다.', 'info', '닫기');
       fetchArtists();
       handleClose();
     } catch (err) {
@@ -284,9 +286,14 @@ export default function ChannelAdminPage() {
   };
 
   const handleDelete = (channelId: string) => {
-    if (!confirm("삭제하시겠습니까?")) return;
+    //if (!confirm("삭제하시겠습니까?")) return;
 
-    setArtists((prev) => prev.filter((a) => a.channelId !== channelId));
+    sweetConfirm(`삭제하시겠습니까?`, 'question', async () => {
+      deleteChannel(channelId);
+
+      fetchArtists();
+      //setArtists((prev) => prev.filter((a) => a.channelId !== channelId));
+    });
   };
 
   return (
@@ -362,8 +369,11 @@ export default function ChannelAdminPage() {
 
       {/* 팝업 */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="lg">
-        <DialogTitle>
-          {artistInput}
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>{artistInput} 인기곡 선택</span>
+          <IconButton onClick={handleClose}>
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
 
         <DialogContent>
@@ -373,27 +383,32 @@ export default function ChannelAdminPage() {
             // 👉 채널 선택 단계
             <Grid container spacing={2}>
               {channels.map((ch) => (
-                <Grid size={6} key={ch.channelId}>
-                  <Card>
-                    <CardContent>
-                      <img src={ch.thumbnail} width={120} />
+                <CardContent sx={{ display: 'flex', gap: 2 }} key={ch.channelId}>
+                  <img
+                    src={ch.thumbnail}
+                    alt={ch.name}
+                    width={100}
+                    height={100}
+                    style={{ borderRadius: 8 }}
+                  />
 
-                      <Typography>
-                        {ch.nameKo ?? ch.name}
-                      </Typography>
+                  <div>
+                    <Typography>
+                      {ch.nameKo ?? ch.name}
+                    </Typography>
 
-                      <Typography variant="body2">
-                        구독자: {ch.subscriberCount.toLocaleString()}
-                      </Typography>
+                    <Typography variant="body2">
+                      구독자: {ch.subscriberCount.toLocaleString()}
+                    </Typography>
 
-                      <Button
-                        onClick={() => fetchVideosByChannel(ch.channelId)}
-                      >
-                        영상 보기
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </Grid>
+                    <Button
+                      size="small"
+                      onClick={() => fetchVideosByChannel(ch.channelId)}
+                    >
+                      영상 보기
+                    </Button>
+                  </div>
+                </CardContent>
               ))}
             </Grid>
           ) : (
@@ -402,12 +417,12 @@ export default function ChannelAdminPage() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell> 
+                    <TableCell sx={{ width: 50, textAlign: 'center'}}> 
                       <Checkbox checked={isAllSelected} indeterminate={selectedVideos.size > 0 && !isAllSelected} onChange={handleSelectAll} /> 
                     </TableCell>
-                    <TableCell>썸네일</TableCell>
-                    <TableCell>제목</TableCell>
-                    <TableCell>등록일</TableCell>
+                    <TableCell sx={{ width: 100, textAlign: 'center'}}>썸네일</TableCell>
+                    <TableCell sx={{textAlign: 'center'}}>제목</TableCell>
+                    <TableCell sx={{textAlign: 'center'}}>등록일</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -419,11 +434,13 @@ export default function ChannelAdminPage() {
                           onChange={() => handleSelect(v.id.videoId)}
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ textAlign: 'center'}}>
                         <img src={v.snippet.thumbnails.default.url} />
                       </TableCell>
                       <TableCell>{v.snippet.title}</TableCell>
-                      <TableCell>{v.snippet.publishedAt.split('T')[0]}</TableCell>
+                      <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 110, textAlign: 'center' }}>
+                        {v.snippet.publishedAt.split('T')[0]}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

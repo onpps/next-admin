@@ -63,3 +63,16 @@ export const registerArtist = async (param: artistParam): Promise<channelRespons
     throw new Error(message);
   }
 };
+
+//아티스트 채널 삭제
+export const deleteChannel = async (channelId: string): Promise<channelResponse> => {
+  try {
+    const res = await jwtAxios.delete<channelResponse>(`${host}/delete`, {
+      data: { channelId }, //body는 data에 넣어야 함
+    });
+    return res.data;
+  } catch (error) {
+    console.error('deleteDevice error:', error);
+    throw error;
+  }
+};

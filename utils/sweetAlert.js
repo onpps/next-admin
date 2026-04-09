@@ -5,7 +5,16 @@ export const sweetAlert = (title, contents, icon, confirmButtonText) => {
         title: title,
         text: contents,
         icon: icon,
-        confirmButtonText: confirmButtonText
+        confirmButtonText: confirmButtonText,
+        confirmButtonColor: "#3085d6",
+        backdrop: true,
+        allowOutsideClick: false,
+        didOpen: () => {
+          const popup = document.querySelector(".swal2-container");
+          if (popup) {
+            popup.style.zIndex = "2000";
+          }
+        }
     });
 }
 
