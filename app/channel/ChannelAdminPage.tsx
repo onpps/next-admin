@@ -27,7 +27,7 @@ import {
 } from '@mui/material';
 import CloseIcon from "@mui/icons-material/Close";
 //import { filterChannels } from '@/utils/filterChannels';
-import { registerChannel, deleteChannel, getArtistList } from '@/api/channel';
+import { registerChannel, deleteChannel, getArtistList, getArtistSearch } from '@/api/channel';
 import { Channel } from "@/types/Channel";
 import { RAPID_API_KEY } from '@/utils/config';
 import { sweetAlert, sweetConfirm } from '@/utils/sweetAlert'; 
@@ -89,8 +89,12 @@ export default function ChannelAdminPage() {
 
   const fetchArtists = async () => {
     try {
-      const res = await axios.get('/api/artist/list');
-      setArtists(res.data);
+      //const res = await axios.get('/api/artist/list');
+      const data = await getArtistList();
+
+      console.log("getArtistList=>" , data);
+      
+      setArtists(data);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         const status = err.response?.status;
@@ -139,7 +143,7 @@ export default function ChannelAdminPage() {
         }
       );*/
 
-      const res = await getArtistList(name);
+      const res = await getArtistSearch(name);
 
       console.log("res=>" + JSON.stringify(res));
 

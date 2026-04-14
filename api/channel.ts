@@ -32,7 +32,19 @@ interface artistParam {
 }
 
 //아티스트 리스트
-export async function getArtistList(keyword: string): Promise<Channel[]> {
+export async function getArtistList(): Promise<Channel[]> {
+  try {
+    const response = await jwtAxios.get(`${host}/list`);
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+//아티스트 검색
+export async function getArtistSearch(keyword: string): Promise<Channel[]> {
   try {
     const response = await jwtAxios.get(`${host}/search`, {
       params: { keyword }
