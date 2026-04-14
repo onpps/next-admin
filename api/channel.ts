@@ -45,8 +45,8 @@ export async function getArtistList(keyword: string): Promise<Channel[]> {
   }
 }
 
-//아티스트 추가 
-export const registerArtist = async (param: artistParam): Promise<channelResponse> => {
+//아티스트 채널 추가 
+export const registerChannel = async (param: artistParam): Promise<channelResponse> => {
   try {
 
     console.log("param=>" + JSON.stringify(param));
@@ -54,7 +54,7 @@ export const registerArtist = async (param: artistParam): Promise<channelRespons
     const res = await jwtAxios.post<channelResponse>(`${host}/save`, param);
     return res.data;
   } catch (error: any) {
-    console.error('registerArtist error:', error);
+    console.error('registerChannel error:', error);
 
     // 백엔드 메시지 추출
     const message =  '아티스트 등록 중 오류가 발생했습니다.';

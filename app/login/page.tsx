@@ -87,6 +87,10 @@ export default function LoginPage() {
 
         {/* 아이디 찾기 및 비밀번호 변경 영역 (우측 정렬) */}
         <div className="flex justify-end items-center mt-6 text-sm text-gray-400 gap-3">
+          <Link href="/agree" className="hover:text-white transition">
+            회원가입
+          </Link>
+          <span className="text-gray-600 text-xs">|</span>
           <Link href="/findId" className="hover:text-white transition">
             아이디 찾기
           </Link>

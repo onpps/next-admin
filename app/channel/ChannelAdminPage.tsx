@@ -27,7 +27,7 @@ import {
 } from '@mui/material';
 import CloseIcon from "@mui/icons-material/Close";
 //import { filterChannels } from '@/utils/filterChannels';
-import { deleteChannel, getArtistList } from '@/api/channel';
+import { registerChannel, deleteChannel, getArtistList } from '@/api/channel';
 import { Channel } from "@/types/Channel";
 import { RAPID_API_KEY } from '@/utils/config';
 import { sweetAlert, sweetConfirm } from '@/utils/sweetAlert'; 
@@ -251,30 +251,30 @@ export default function ChannelAdminPage() {
       return;
     }
 
-    const payload = selected.map(v => ({
-      videoId: v.id.videoId,
-      title: v.snippet.title,
-      thumbnail: v.snippet.thumbnails.default.url
-    }));
+    //const payload = selected.map(v => ({
+      //videoId: v.id.videoId,
+      //title: v.snippet.title,
+      //thumbnail: v.snippet.thumbnails.default.url
+    //}));
 
     try {
-      await axios.post('/api/artist/save', {
-        channelId: channelId,
-        videos: payload
-      }, {
-        withCredentials: true
-      });
+      //await axios.post('/api/artist/save', {
+        //channelId: channelId,
+        //videos: payload
+      //}, {
+       // withCredentials: true
+      //});
 
       console.log('채널 아이디:', channelId);
       console.log('선택된 영상:', selected);
       
-      //  const param = {
-       //   channelId: channelId,
-       //   videos: selected 
-       // };
+      const param = {
+        channelId: channelId,
+        videos: selected 
+      };
       
         // TODO: DB 저장
-       // await registerArtist(param);
+      await registerChannel(param);
 
       //alert('저장 완료');
       sweetAlert('저장 완료', '저장 완료 하였습니다.', 'info', '닫기');

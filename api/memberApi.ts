@@ -1,3 +1,4 @@
+import axios from "axios"
 import jwtAxios from "../utils/jwtUtil";
 import { MemberListResponse, Member } from "../types/Member";
 //import { API_SERVER_HOST } from "@/utils/config";
@@ -109,4 +110,33 @@ export async function getMembers(params: PageParam): Promise<Member[]> {
     return []; // 오류 발생 시 빈 배열 반환
   }
 }
+
+// 회원가입
+export const doRegister = async (param: any): Promise<memberResponse> => {
+  try {
+    const res = await axios.post<memberResponse>(`${host}/register`, param);
+    return res.data;
+  } catch (error) {
+    console.error("doRegister error:", error);
+    throw error;
+  }
+};
+
+// 중복 체크
+export const doDuplicateCheck = async (param: {
+  type: string;
+  id?: string;
+  email?: string;
+}): Promise<memberResponse> => {
+  try {
+    const res = await axios.post<memberResponse>(
+      `${host}/duplicateCheck`,
+      param
+    );
+    return res.data;
+  } catch (error) {
+    console.error("doDuplicateCheck error:", error);
+    throw error;
+  }
+};
 
