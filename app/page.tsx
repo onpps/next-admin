@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import SockJS from "sockjs-client";
+import { Client, IMessage } from "@stomp/stompjs";
 import { useRouter } from "next/navigation";
 import { PlayList } from "@/types/Dashboard";
 import { getDashboardList } from "@/api/dashboardApi";
@@ -69,6 +71,37 @@ export default function AdminDashboard() {
     );
   };
 
+  useEffect(() => {
+      const client = new Client({
+        webSocketFactory: () => new SockJS("https://music-q.co.kr/ws-play"),
+        reconnectDelay: 5000,
+      });
+  
+      client.onConnect = () => {
+        client.subscribe("/topic/play", (message: IMessage) => {
+          const data = JSON.parse(message.body);
+  
+          console.log("data=>" + JSON.stringify(data));
+  
+          if (data.type === "PLAY_SUCCESS") {
+            getDashboardList()
+              .then((data) => {
+                if (data?.playList && Array.isArray(data.playList)) {
+                  setRequests(data.playList);
+                }
+              })
+              .catch((err) => console.log(err));
+          }
+        });
+      };
+  
+      client.activate();
+  
+      return () => {
+        client.deactivate();
+      };
+  }, [getDashboardList]);
+  
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
