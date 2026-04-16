@@ -140,3 +140,38 @@ export const doDuplicateCheck = async (param: {
   }
 };
 
+// 회원 상세 조회 (내 정보)
+export const getMemberInfo = async (loginInfo: any): Promise<Member> => {
+  try {
+    const res = await jwtAxios.post<Member>(`${host}/getMemberInfo`, loginInfo);
+    return res.data;
+  } catch (error) {
+    console.error("getMemberInfo error:", error);
+    throw error;
+  }
+};
+
+// 회원 정보 수정
+export const modifyMember = async (param: {
+  id: string;
+  email: string;
+  name: string;
+  storeName: string;
+  zonecode: string;
+  address1: string;
+  address2?: string;
+  phone: string;
+  password: string;
+  newPassword?: string;
+}): Promise<memberResponse> => {
+  try {
+    const res = await jwtAxios.put<memberResponse>(
+      `${host}/modify`,
+      param
+    );
+    return res.data;
+  } catch (error) {
+    console.error("modifyMember error:", error);
+    throw error;
+  }
+};

@@ -49,11 +49,6 @@ export const useForm = (initialValues: FormValues = initialFormValues) => {
     }));
   };
 
-  // 숫자만 입력
-  const onlyNumber = (value: string) => {
-    return value.replace(/[^0-9]/g, "");
-  };
-
   // validation
   const validate = (): string | null => {
     const {
@@ -108,11 +103,55 @@ export const useForm = (initialValues: FormValues = initialFormValues) => {
     return null;
   };
 
+  const modifyValidate = (): string | null => {
+    const {
+      id,
+      email1,
+      email2,
+      password,
+      name,
+      storeName,
+      zonecode,
+      address1,
+      phone1,
+      phone2,
+      phone3,
+    } = values;
+
+    if (!id) return "아이디를 입력해주세요.";
+
+    if (!email1 || !email2) return "이메일을 입력해주세요.";
+    if (email1.includes(" ")) return "이메일 공백을 제거해주세요.";
+
+    if (!password) return "비밀번호를 입력해주세요.";
+
+    if (!password)
+      return "현재 비밀번호를 입력해주세요.";
+
+    if (!name) return "성명을 입력해주세요.";
+    if (name.includes(" ")) return "성명 공백을 제거해주세요.";
+
+    if (!storeName) return "매장명을 입력해주세요.";
+
+    if (!zonecode || !address1) return "주소를 입력해주세요.";
+
+    if (!phone1 || !phone2 || !phone3)
+      return "휴대폰 번호를 입력해주세요.";
+
+    return null;
+  };
+  
+  // 숫자만 입력
+  const onlyNumber = (value: string) => {
+    return value.replace(/[^0-9]/g, "");
+  };
+
   return {
     values,
     setValues,
     handleChange,
     validate,
+    modifyValidate,
     onlyNumber,
   };
 };
