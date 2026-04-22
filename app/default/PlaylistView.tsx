@@ -173,6 +173,7 @@ export default function PlaylistView({ items, openPreview }: Props) {
                         src={item.thumbnail}
                         alt=""
                         fill
+                        unoptimized
                         style={{ objectFit: "cover" }}
                      />
 
