@@ -205,6 +205,7 @@ export default function MusicPageContent() {
                                                  alt={music.title}
                                                  width={150}  // 썸네일 가로 크기
                                                  height={100} // 썸네일 세로 크기
+                                                 unoptimized
                                                  style={{ objectFit: 'cover', borderRadius: '8px' }}
                                               /></td>
                 <td className="p-3 text-center">{decode(music.title)}</td>

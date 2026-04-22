@@ -359,6 +359,7 @@ export default function VideoPageContent() {
                                   alt={music.title}
                                   width={150}
                                   height={100}
+                                  unoptimized
                                   style={{ objectFit: 'cover', borderRadius: '8px' }}
                                   onClick={() => goVideo(music.videoId)}
                                 />
