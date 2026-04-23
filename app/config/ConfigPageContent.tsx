@@ -31,6 +31,7 @@ interface StoreSettings {
 export default function ConfigPageContent() {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // 메시지 상태 추가
 
   const [settings, setSettings] = useState<StoreSettings>({
     searchSource: "api",
@@ -122,19 +123,9 @@ export default function ConfigPageContent() {
     }
 
     try {
-
-      /*await fetch("/api/config/changePassword", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(passwordForm),
-      });*/
-
       await changePassword(passwordForm);
-
+      
       setPasswordDialogOpen(false);
-
       setPasswordForm({
         currentPassword: "",
         newPassword: "",
@@ -142,11 +133,17 @@ export default function ConfigPageContent() {
       });
 
       setError(false);
+      setSnackbarMessage("비밀번호가 성공적으로 변경되었습니다."); // 성공 메시지
       setOpen(true);
 
-    } catch (e) {
+    } catch (e: unknown) { // 타입을 명시하지 않으면 기본적으로 unknown입니다.
       console.log(e);
       setError(true);
+      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const serverMsg = (e as any).response?.data || "비밀번호 변경 중 오류가 발생했습니다.";
+      
+      setSnackbarMessage(serverMsg);
       setOpen(true);
     }
   };
@@ -323,15 +320,17 @@ export default function ConfigPageContent() {
 
       <Snackbar
         open={open}
-        autoHideDuration={1000}
+        autoHideDuration={3000} // 에러 메시지를 읽을 수 있도록 시간을 조금 늘림
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         onClose={() => setOpen(false)}
       >
         <Alert
             severity={error ? "error" : "success"}
             onClose={() => setOpen(false)}
+            variant="filled"
+            sx={{ width: '100%' }}
         >
-            {error ? "설정 저장 실패" : "설정이 저장되었습니다"}
+            {snackbarMessage} 
         </Alert>
       </Snackbar>
     </Box>

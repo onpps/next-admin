@@ -45,6 +45,9 @@ export default function VideoPageContent() {
       current: 0
     });
 
+    // 오늘 날짜를 'YYYY-MM-DD' 형식으로 생성
+    const today = new Date().toISOString().split('T')[0];
+
     const [previewVideo, setPreviewVideo] = useState<string | null>(null);
 
     // 공통 onChange 핸들러
@@ -295,6 +298,7 @@ export default function VideoPageContent() {
               type="date"
               className="p-2 rounded border border-gray-300"
               name="regDate"
+              defaultValue={today} // 초기값 설정
               onChange={handleChange}
             />
 
@@ -376,7 +380,9 @@ export default function VideoPageContent() {
                                 </button>
                               </td>
                               <td className="p-3 text-center">
-                                {music.playYn === 'Y' ? (
+                                {music.cancelYn === 'Y' ? (
+                                  <span className="text-red-600 font-semibold">취소완료</span>
+                                ) : music.playYn === 'Y' ? (
                                   <span className="text-green-600 font-semibold">재생완료</span>
                                 ) : (
                                   <span className="text-gray-400">대기중</span>
@@ -409,7 +415,7 @@ export default function VideoPageContent() {
                               </td>
                               <td>
                               {/* 취소 사유 라벨 (레이아웃 영향 없음) */}
-                              {music.cancelYn === 'Y' && (
+                              {music.cancelYn === 'Y' && music.cancelReason && (
                                 <div
                                   className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
                                 >
