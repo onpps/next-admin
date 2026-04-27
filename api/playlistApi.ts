@@ -43,14 +43,31 @@ export const registerDefaultPlaylist = async (param: playListParam): Promise<mus
   try {
     const res = await jwtAxios.post<musicResponse>(`${host}/default`, param);
     return res.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('registerDefaultMusic error:', error);
+
+    // 그냥 그대로 던짐 (핵심)
+    throw error;
+  }
+};
+
+//기본 재생음악 삭제 
+export const deletePlaylist = async (playlistId: string): Promise<musicResponse> => {
+  try {
+
+    const res = await jwtAxios.delete<musicResponse>(`${host}/delete`, {
+      data: { playlistId }, //body는 data에 넣어야 함
+    });
+
+    return res.data;
+  } catch (error: any) {
+    console.error('deletePlaylist error:', error);
 
     // 백엔드 메시지 추출
     const message =
       error?.response?.data?.message ||
       error?.response?.data ||
-      '기본 재생목록 등록 중 오류가 발생했습니다.';
+      '기본 재생목록 삭제 중 오류가 발생했습니다.';
 
     // 프론트에서 쓰기 쉽게 문자열로 throw
     throw new Error(message);

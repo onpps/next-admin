@@ -60,6 +60,8 @@ export default function Sidebar() {
         <li><Link href="/playList" className={menuClass('/playList')}>신청곡 리스트</Link></li>
         <li><Link href="/default" className={menuClass('/default')}>기본 재생목록 설정</Link></li>
         <li><Link href="/mypage" className={menuClass('/mypage')}>매장정보수정</Link></li>
+        <li><Link href="/payment/history" className={menuClass('/payment/history')}>결제내역조회</Link></li>
+        <li><Link href="/purchase" className={menuClass('/purchase')}>이용권 구매</Link></li>
         <li><Link href="/config" className={menuClass('/config')}>환경 설정</Link></li>
       </ul>
     </aside>

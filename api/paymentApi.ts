@@ -56,6 +56,28 @@ export async function fetchPayments(params: PageParam): Promise<PaymentListRespo
   }
 }
 
+//주문생성
+export const createPayment = async (param: any) => {
+  try {
+    const res = await jwtAxios.post(`${host}/create`, param);
+    return res.data;
+  } catch (error) {
+    console.error('createPayment error:', error);
+    throw error;
+  }
+}
+
+//결제완료
+export const confirmPayment = async (param: any) => {
+  try {
+    const res = await jwtAxios.post(`${host}/confirm`, param);
+    return res.data;
+  } catch (error) {
+    console.error('confirmPayment error:', error);
+    throw error;
+  }
+}
+
 //결제 취소
 export const cancelPayment = async (param: CancelPaymentParam): Promise<CancelPaymentResponse> => {
   try {

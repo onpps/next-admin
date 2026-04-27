@@ -19,6 +19,7 @@
     "@mui/material": "^7.0.2",
     "@reduxjs/toolkit": "^2.6.1",
     "@stomp/stompjs": "^7.3.0",
+    "@tosspayments/payment-sdk": "^1.9.2",
     "axios": "^1.8.4",
     "hls.js": "^1.6.2",
     "html-entities": "^2.6.0",

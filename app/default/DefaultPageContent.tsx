@@ -21,7 +21,8 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { getDefaultMusicList, registerDefaultPlaylist } from '@/api/playlistApi';
+import { sweetConfirm } from "@/utils/sweetAlert";
+import { getDefaultMusicList, registerDefaultPlaylist, deletePlaylist } from '@/api/playlistApi';
 import { Playlist } from "@/types/Playlist";
 import { API_KEY } from "@/utils/config";
 import PlaylistView from "./PlaylistView";
@@ -48,11 +49,11 @@ interface YoutubePlaylistItem {
   };
 }
 
-interface YoutubeVideo {
+/*interface YoutubeVideo {
   contentDetails: {
     duration: string;
   };
-}
+}*/
 
 interface Track {
   title: string;
@@ -112,14 +113,14 @@ export default function DefaultPageContent() {
 
         if (videoIds.length === 0) continue;
 
-        const res3 = await fetch(
-          `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds.join(",")}&key=${API_KEY}`
-        );
+        //const res3 = await fetch(
+          //`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds.join(",")}&key=${API_KEY}`
+        //);
 
-        const data3 = await res3.json();
+        //const data3 = await res3.json();
 
         // 👉 평균 길이 계산
-        let totalMin = 0;
+        /*let totalMin = 0;
         let count = 0;
 
         data3.items.forEach((v: YoutubeVideo) => {
@@ -135,12 +136,12 @@ export default function DefaultPageContent() {
             totalMin += total;
             count++;
           }
-        });
+        });*/
 
-        const avg = totalMin / (count || 1);
+       // const avg = totalMin / (count || 1);
 
-        // 🔥 평균 10분 이하만 통과
-        if (avg <= 10) {
+       // 🔥 평균 10분 이하만 통과
+       // if (avg <= 30) {
           filtered.push({
             storeId: "",
             playlistId,
@@ -151,7 +152,7 @@ export default function DefaultPageContent() {
             selected: false,
             videos : []
           });
-        }
+       // }
       }
 
       setItems(filtered);
@@ -242,13 +243,14 @@ export default function DefaultPageContent() {
     if (!selectedItem) return;
 
     try {
-      setSaving(true); // 시작
+      setSaving(true);
 
       const param = {
-          playlistId: selectedItem.playlistId,
-          title: selectedItem.title,
-          channel: selectedItem.channel,
-          thumbnail: selectedItem.thumbnail };
+        playlistId: selectedItem.playlistId,
+        title: selectedItem.title,
+        channel: selectedItem.channel,
+        thumbnail: selectedItem.thumbnail
+      };
 
       console.log("param=>" + JSON.stringify(param));
 
@@ -264,12 +266,37 @@ export default function DefaultPageContent() {
 
       loadPlayList();
 
-    } catch (e) {
-        console.error(e);
+     } catch (e: unknown) { // any → unknown
+      console.error(e);
 
-        setSaving(false);
+      let errorMessage = "서버 오류가 발생했습니다.";
+
+      // axios 스타일 에러 처리
+      if (typeof e === "object" && e !== null) {
+        const err = e as {
+          response?: {
+            data?: { message?: string } | string;
+          };
+          message?: string;
+        };
+
+        if (typeof err.response?.data === "string") {
+          errorMessage = err.response.data;
+        } else if (typeof err.response?.data?.message === "string") {
+          errorMessage = err.response.data.message;
+        } else if (typeof err.message === "string") {
+          errorMessage = err.message;
+        }
+      }
+
+      setSnackbar({
+        open: true,
+        message: errorMessage,
+        severity: "error"
+      });
+
     } finally {
-      setSaving(false); // 끝
+      setSaving(false);
     }
   };
 
@@ -406,7 +433,24 @@ export default function DefaultPageContent() {
 
       ) : (
         /* 기존 플레이리스트 */
-        <PlaylistView items={items} openPreview={openPreview} />
+       <PlaylistView
+          items={items}
+          openPreview={openPreview}
+          onDelete={(playlistId) => {
+
+            sweetConfirm(`삭제하시겠습니까?`, 'question', async () => {
+              try {
+                await deletePlaylist(playlistId);
+                loadPlayList();
+              } catch (error) {
+                console.error("삭제 중 오류 발생:", error);
+              }
+            });
+            
+            // UI 제거
+            //setItems(prev => prev.filter(p => p.playlistId !== playlistId));
+          }}
+        />
       )}
       {/*  미리보기 다이얼로그 */}
        <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">

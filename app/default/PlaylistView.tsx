@@ -12,6 +12,7 @@ import {
   AccordionSummary,
   AccordionDetails
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -21,9 +22,10 @@ import { Playlist, PlaylistVideo } from "@/types/Playlist";
 interface Props {
   items: Playlist[];
   openPreview: (value: Playlist) => void;
+  onDelete: (playlistId: string) => void;
 }
 
-export default function PlaylistView({ items, openPreview }: Props) {
+export default function PlaylistView({ items, openPreview, onDelete }: Props) {
 
   const [playingVideo, setPlayingVideo] = useState<PlaylistVideo | null>(null);
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -102,6 +104,7 @@ export default function PlaylistView({ items, openPreview }: Props) {
                   alt=""
                   width={80}
                   height={80}
+                  unoptimized
                   style={{ borderRadius: 8 }}
                 />
 
@@ -126,6 +129,19 @@ export default function PlaylistView({ items, openPreview }: Props) {
                 ) : (
                     <PlayCircleFilledWhiteIcon sx={{ color: "#22c55e", fontSize: 32 }} onClick={() => openPreview(playlist)} />
                 )}
+
+                  {/* 🗑 삭제 버튼 */}
+                  <DeleteIcon
+                    sx={{
+                      color: "#ef4444",
+                      fontSize: 28,
+                      cursor: "pointer",
+                      "&:hover": {
+                        color: "#dc2626"
+                      }
+                    }}
+                    onClick={() => onDelete(playlist.playlistId)}
+                  />
               </Box>
 
             </Box>

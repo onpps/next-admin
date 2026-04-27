@@ -84,7 +84,7 @@ export const deleteChannel = async (channelId: string): Promise<channelResponse>
     });
     return res.data;
   } catch (error) {
-    console.error('deleteDevice error:', error);
+    console.error('deleteChannel error:', error);
     throw error;
   }
 };
