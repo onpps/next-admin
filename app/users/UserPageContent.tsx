@@ -221,7 +221,16 @@ const {page, size, moveToList} = useCustomMove();
               {members?.dtoList?.map((member: Member) => (
                 <TableRow key={member.id}>
                   <TableCell align="center">{member.id}</TableCell>
-                  <TableCell align="center">{member.nickname}</TableCell>
+                  <TableCell align="center">
+                    {member.roleList?.map((role) => {
+                      switch (role) {
+                        case 'MANAGER': return '매장관리자';
+                        case 'ADMIN': return '관리자';
+                        case 'USER': return '일반회원';
+                        default: return role; // 정의되지 않은 경우 영어 그대로 표시
+                      }
+                    }).join(', ')}
+                  </TableCell>
                   <TableCell align="center">{member.name}</TableCell>
                   <TableCell align="center">{member.email}</TableCell>
                   <TableCell align="center">{member.storeName}</TableCell>

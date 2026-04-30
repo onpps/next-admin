@@ -25,12 +25,12 @@ interface Period {
 
 // 🔧 상품 타입 적용
 const products: Product[] = [
-  {
+  /*{
     code: 'BASIC',
     name: '베이직',
     price: 30000,
     descriptions: ['계정 3개 사용가능'],
-  },
+  },*/
   {
     code: 'STANDARD',
     name: '스탠다드',
@@ -93,6 +93,8 @@ export default function SubscriptionPage() {
 
     try {
       const response = await createPayment(paymentParam);
+
+      console.log("response=>" + JSON.stringify(response));
 
       if (response.status === 401) {
         alert("로그인이 필요합니다.");

@@ -88,3 +88,25 @@ export const cancelPayment = async (param: CancelPaymentParam): Promise<CancelPa
     throw error;
   }
 };
+
+// 세금계산서 발급
+export const issueTaxInvoice = async (paymentId: string) => {
+  try {
+    const res = await jwtAxios.post<CancelPaymentResponse>(`${host}/tax-invoice/${paymentId}`);
+    return res.data;
+  } catch (error) {
+    console.error('issueTaxInvoice error:', error);
+    throw error;
+  }
+};
+
+// 영수증 조회 URL 가져오기
+export const getReceiptUrl = async (paymentKey: string) => {
+  try {
+    const res = await jwtAxios.post<CancelPaymentResponse>(`${host}/receipt/${paymentKey}`);
+    return res.data;
+  } catch (error) {
+    console.error('getReceiptUrl error:', error);
+    throw error;
+  }
+};

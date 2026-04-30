@@ -15,6 +15,7 @@ export interface Member {
   numberOfSongRequests: number;
   useYn: string | null;
   joinDate: string;
+  roleList: string[];
 }
   
 export interface PageRequestDTO {

@@ -40,12 +40,20 @@ interface YoutubePlaylistItem {
     title: string;
     channelTitle: string;
     thumbnails: {
-      medium: { url: string };
+      high?: { url: string };
+      medium?: { url: string };
       default?: { url: string };
     };
     resourceId: {
       videoId: string;
     };
+  };
+}
+
+interface YouTubeVideoItem {
+  id: string;
+  contentDetails?: {
+    duration?: string;
   };
 }
 
@@ -68,6 +76,7 @@ export default function DefaultPageContent() {
   const [saving, setSaving] = useState(false);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Playlist | null>(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -75,19 +84,44 @@ export default function DefaultPageContent() {
     severity: "success"
   });
 
-  const formatDuration = (iso: string) => {
-    const match = iso.match(/PT(?:(\d+)M)?(?:(\d+)S)?/);
-    const min = match?.[1] || "0";
-    const sec = match?.[2] || "0";
-    return `${min}:${sec.padStart(2, "0")}`;
+  const parseDurationToSec = (iso: string): number => {
+    const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+
+    if (!match) return 0;
+
+    const h = parseInt(match[1] || "0", 10);
+    const m = parseInt(match[2] || "0", 10);
+    const s = parseInt(match[3] || "0", 10);
+
+    return h * 3600 + m * 60 + s;
+  };
+
+  const formatDuration = (iso: string): string => {
+    if (!iso) return "0:00";
+
+    const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+
+    if (!match) return "0:00";
+
+    const hours = parseInt(match[1] || "0", 10);
+    const minutes = parseInt(match[2] || "0", 10);
+    const seconds = parseInt(match[3] || "0", 10);
+
+    if (hours > 0) {
+      return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    return `${minutes}:${String(seconds).padStart(2, "0")}`;
   };
 
   const searchYoutube = async () => {
     if (!keyword) return;
 
     try {
+      setSearching(true); // ✅ 시작
+
       const res = await fetch(
-        `https://www.googleapis.com/youtube/v3/search?part=snippet&type=playlist&q=${keyword}&maxResults=10&key=${API_KEY}`
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&type=playlist&q=${keyword}&maxResults=100&key=${API_KEY}`
       );
 
       const data = await res.json();
@@ -102,7 +136,7 @@ export default function DefaultPageContent() {
 
         // 👉 playlist 내부 10개만 샘플링
         const res2 = await fetch(
-          `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=100&playlistId=${playlistId}&key=${API_KEY}`
+          `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${API_KEY}`
         );
 
         const data2 = await res2.json();
@@ -113,35 +147,29 @@ export default function DefaultPageContent() {
 
         if (videoIds.length === 0) continue;
 
-        //const res3 = await fetch(
-          //`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds.join(",")}&key=${API_KEY}`
-        //);
+        // duration 조회
+        const res3 = await fetch(
+          `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds.join(",")}&key=${API_KEY}`
+        );
 
-        //const data3 = await res3.json();
+        const data3 = await res3.json();
 
-        // 👉 평균 길이 계산
-        /*let totalMin = 0;
-        let count = 0;
+        // 1시간 이상 영상 존재 여부 체크
+        const hasLongVideo = data3.items.some((v: YouTubeVideoItem) => {
+          const duration = v?.contentDetails?.duration;
+          if (!duration) return false; // undefined 방어
+          
+          const sec = parseDurationToSec(duration);
+          return sec >= 3600; // 1시간 이상
+        });
 
-        data3.items.forEach((v: YoutubeVideo) => {
-          const duration = v.contentDetails.duration;
-          const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+        // 하나라도 있으면 제외
+        if (hasLongVideo) {
+          console.log("❌ 제외됨 (1시간 이상 영상 포함):", playlistId);
+          continue;
+        }
 
-          const hour = parseInt(match?.[1] || "0");
-          const min = parseInt(match?.[2] || "0");
-
-          const total = hour * 60 + min;
-
-          if (total > 0) {
-            totalMin += total;
-            count++;
-          }
-        });*/
-
-       // const avg = totalMin / (count || 1);
-
-       // 🔥 평균 10분 이하만 통과
-       // if (avg <= 30) {
+       // 통과한 플레이리스트만 추가
           filtered.push({
             storeId: "",
             playlistId,
@@ -152,7 +180,6 @@ export default function DefaultPageContent() {
             selected: false,
             videos : []
           });
-       // }
       }
 
       setItems(filtered);
@@ -160,6 +187,8 @@ export default function DefaultPageContent() {
 
     } catch (e) {
       console.error(e);
+    } finally {
+      setSearching(false); // ✅ 종료
     }
   };
 
@@ -203,40 +232,105 @@ export default function DefaultPageContent() {
 
   //  플레이리스트 상세 (곡 목록 가져오기)
   const openPreview = async (item: Playlist) => {
-    setSelectedItem(item);
+    try {
+      setSelectedItem(item);
 
-    console.log("item=>" + JSON.stringify(item));
+      console.log("item=>", item);
 
-    const res = await fetch(
-      `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${item.playlistId}&key=${API_KEY}`
-    );
+      // 1️⃣ 플레이리스트 조회
+      const res = await fetch(
+        `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${item.playlistId}&key=${API_KEY}`
+      );
 
-    const data = await res.json();
+      const data = await res.json();
+      console.log("data=>", data);
 
-    const videoIds = data.items.map(
-      (it: YoutubePlaylistItem) => it.snippet.resourceId.videoId
-    );
+      if (!data.items || data.items.length === 0) {
+        setTracks([]);
+        setOpen(true);
+        return;
+      }
 
-    const res2 = await fetch(
-      `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds.join(",")}&key=${API_KEY}`
-    );
+      // 2️⃣ videoId 추출 (null 방어)
+      const videoIds = data.items
+        .map((it: YoutubePlaylistItem) => it?.snippet?.resourceId?.videoId)
+        .filter((id: string | undefined) => !!id);
 
-    const data2 = await res2.json();
+      if (videoIds.length === 0) {
+        setTracks([]);
+        setOpen(true);
+        return;
+      }
 
-    const list: Track[] = data.items.map((it: YoutubePlaylistItem, idx: number): Track => {
-        const duration = data2.items[idx]?.contentDetails?.duration;
+      // 3️⃣ videos API 조회 (duration)
+      const res2 = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds.join(",")}&key=${API_KEY}`
+      );
 
-        return {
-          title: it.snippet.title,
-          thumbnail: it.snippet.thumbnails.default?.url || "/no-image.png",
-          duration: formatDuration(duration || "PT0M0S")
-        };
-      })
-      .filter((item: Track) => item.duration !== "0:00")
-      .filter((item: Track) => !item.title.toLowerCase().includes("playlist"));
+      const data2 = await res2.json();
+      console.log("data2=>", data2);
 
-    setTracks(list);
-    setOpen(true);
+      // 핵심: videoId → duration 매핑
+      const durationMap: Record<string, string> = {};
+
+      if (data2.items) {
+        data2.items.forEach((v: YouTubeVideoItem) => {
+          const duration = v.contentDetails?.duration;
+
+          if (v.id && duration) {
+            durationMap[v.id] = duration;
+          }
+        });
+      }
+
+      console.log("durationMap=>" + JSON.stringify(durationMap));
+
+      // 4️⃣ 리스트 생성 (안전 + fallback 포함)
+      const list: Track[] = data.items
+        .map((it: YoutubePlaylistItem): Track | null => {
+          const videoId = it?.snippet?.resourceId?.videoId;
+
+          console.log("videoId=>" + videoId);
+
+          if (!videoId) return null;
+
+          const title = it?.snippet?.title || "";
+
+          // 썸네일 fallback (high → medium → default)
+          const thumbnails = it?.snippet?.thumbnails;
+          const thumbnail =
+            thumbnails?.high?.url ||
+            thumbnails?.medium?.url ||
+            thumbnails?.default?.url ||
+            "/no-image.png";
+
+          const durationIso = durationMap[videoId];
+
+          console.log("durationIso=>" + durationIso);
+
+          const duration = formatDuration(durationIso || "PT0M0S");
+
+          return {
+            title,
+            thumbnail,
+            duration,
+          };
+        })
+        //.filter((item: any): item is Track => item !== null)
+        // duration 없는 영상 제거
+        //.filter((item: any) => item.duration !== "0:00")
+        // 플레이리스트 영상 제거
+        //.filter((item: any) => !item.title.toLowerCase().includes("playlist"));
+
+      console.log("final list=>", list);
+
+      setTracks(list);
+      setOpen(true);
+    } catch (error) {
+      console.error("openPreview error:", error);
+      setTracks([]);
+      setOpen(true);
+    }
   };
 
   const confirmSelect = async () => {
@@ -361,7 +455,12 @@ export default function DefaultPageContent() {
             }
           }}
         />
-        <Button variant="contained" onClick={searchYoutube}>
+        <Button
+          variant="contained"
+          onClick={searchYoutube}
+          disabled={searching}
+          sx={{ minWidth: 100 }}
+        >
           검색
         </Button>
       </Box>
@@ -510,6 +609,44 @@ export default function DefaultPageContent() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {searching && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0,0,0,0.4)",
+            zIndex: 2000,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Box
+            sx={{
+              width: 300,
+              backgroundColor: "#ffffff",
+              borderRadius: 3,
+              p: 3,
+              textAlign: "center",
+              boxShadow: 5
+            }}
+          >
+            <CircularProgress sx={{ mb: 2 }} />
+
+            <Typography fontWeight={600} mb={1}>
+              검색 중입니다...
+            </Typography>
+
+            <Typography variant="body2">
+              플레이리스트를 검색하고 있습니다.
+            </Typography>
+          </Box>
+        </Box>
+      )}
 
       {saving && (
         <Box

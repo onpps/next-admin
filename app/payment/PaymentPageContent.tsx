@@ -4,7 +4,6 @@ import { PaymentListResponse, Payment } from '../../types/Payment';
 import PageComponent from "@/components/PageComponent";
 import useCustomMove from '@/utils/useCustomMove';
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
-import { useRouter } from 'next/navigation';
 
 interface CancelParam {
   paymentKey: string;
@@ -22,8 +21,6 @@ const initState = {
 export default function PaymentPageContent() {
     const {page, size, moveToList} = useCustomMove();
     const [searchParams, setSearchParams] = useState(initState);
-    
-    const router = useRouter();
 
     const [payments, setPayments] = useState<PaymentListResponse>({
       dtoList: [],
@@ -80,7 +77,8 @@ export default function PaymentPageContent() {
           }
     
           sweetToast('결제가 취소 되었습니다.');
-          router.replace('/payment/list');
+          //router.replace('/payment/list');
+          fetchPayments({page, size, ...searchParams}).then(setPayments);
         } catch (error) {
           console.log("error=>" + JSON.stringify(error));
           alert("오류가 발생했습니다.");
@@ -156,18 +154,27 @@ export default function PaymentPageContent() {
           <tbody>
             {payments.dtoList.map((payment: Payment) => (
               <tr key={payment.id} className="border-t">
-                <td className="p-3 text-center">{payment.id}</td>
+                <td className="p-3 text-center">{payment.paymentId}</td>
                 <td className="p-3 text-center">{payment.productCode}</td>
                 <td className="p-3 text-center">{payment.productPeriod}</td>
-                <td className="p-3 text-center">{payment.amount}</td>
+                <td className="p-3 text-center">{payment.amount.toLocaleString()}</td>
                 <td className="p-3 text-center">{payment.userId}</td>
                 <td className="p-3 text-center">{payment.status}</td>
                 <td className="p-3 text-center">{payment.paymentKey}</td>
                 <td className="p-3 text-center">{payment.paidAt}</td>
                 <td className="p-3 text-center">{payment.startDate} ~ {payment.endDate}</td>
                 <th className="p-3 text-center">
-                  {payment.paymentKey && payment.status !== 'READY' && (
-                  <button className="bg-red-500 text-white rounded p-2 hover:bg-red-600" onClick={()=>handleCancelPayment(payment.paymentKey)}>취소</button>
+                  {payment.status === 'CANCELED' ? (
+                    <span className="text-gray-500 font-semibold">취소완료</span>
+                  ) : (
+                    payment.paymentKey && payment.status !== 'READY' && (
+                      <button
+                        className="bg-red-500 text-white rounded p-2 hover:bg-red-600"
+                        onClick={() => handleCancelPayment(payment.paymentKey)}
+                      >
+                        취소
+                      </button>
+                    )
                   )}
                 </th>
               </tr>

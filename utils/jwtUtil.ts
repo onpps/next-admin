@@ -27,7 +27,7 @@ const beforeReq = (config: InternalAxiosRequestConfig): InternalAxiosRequestConf
 
   const memberInfo = getCookie("member") as MemberInfo | undefined;
 
-  console.log("memberInfo=>" + JSON.stringify(memberInfo));
+  //console.log("memberInfo=>" + JSON.stringify(memberInfo));
 
   if (!memberInfo || memberInfo.accessToken === "undefined" || memberInfo.refreshToken === "undefined") {
     console.log("Member NOT FOUND");

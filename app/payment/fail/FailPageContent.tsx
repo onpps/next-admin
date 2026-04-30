@@ -6,7 +6,9 @@ export default function FailPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const code = searchParams.get('code');
   const message = searchParams.get('message');
+  const orderId = searchParams.get('orderId');
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-black text-white">
@@ -16,7 +18,15 @@ export default function FailPageContent() {
         </h1>
 
         <p className="mb-6">
+          {code || '결제 중 문제가 발생했습니다.'}
+        </p>
+
+        <p className="mb-6">
           {message || '결제 중 문제가 발생했습니다.'}
+        </p>
+
+         <p className="mb-6">
+          {orderId || '결제 중 문제가 발생했습니다.'}
         </p>
 
         <button

@@ -1,10 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { fetchPayments } from '../../../api/paymentApi';
 import { Payment } from '../../../types/Payment';
+import { sweetAlert } from '@/utils/sweetAlert';
 
 export default function MyPaymentPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [currentProduct, setCurrentProduct] = useState<Payment | null>(null);
+
+  /*const handleTaxInvoice = async (paymentId: string) => {
+    try {
+      const res = await issueTaxInvoice(paymentId);
+
+      if (res.success) {
+        sweetToast('세금계산서가 발급되었습니다.');
+      } else {
+        sweetAlert('실패', res.message || '발급 실패', 'error');
+      }
+    } catch (err) {
+      console.log(err);
+      sweetAlert('오류', '세금계산서 발급 중 오류 발생', 'error');
+    }
+  };*/
+
+  const handleReceipt = async (receiptUrl: string) => {
+    try {
+      //const res = await getReceiptUrl(paymentKey);
+
+      // 새창으로 열기
+      window.open(receiptUrl, '_blank');
+    } catch (err) {
+      console.log(err);
+      sweetAlert('오류', '영수증 조회 실패', 'error');
+    }
+  };
 
   useEffect(() => {
     fetchPayments({ page: 1, size: 100 }).then((res) => {
@@ -76,7 +104,7 @@ export default function MyPaymentPage() {
               <th className="p-3">이용기간</th>
               <th className="p-3">결제수단</th>
               <th className="p-3">금액</th>
-              <th className="p-3">세금계산서</th>
+              {/*<th className="p-3">세금계산서</th>*/}
               <th className="p-3">영수증</th>
             </tr>
           </thead>
@@ -93,11 +121,22 @@ export default function MyPaymentPage() {
                   </td>
                   <td className="p-3">카드</td>
                   <td className="p-3">{p.amount.toLocaleString()}</td>
+                  {/*<td className="p-3">
+                      <button
+                        className="text-blue-500 underline"
+                        onClick={() => handleTaxInvoice(p.paymentId)}
+                      >
+                        발급
+                      </button>
+                  </td>*/}
+
                   <td className="p-3">
-                    <button className="text-blue-500 underline">발급</button>
-                  </td>
-                  <td className="p-3">
-                    <button className="text-blue-500 underline">보기</button>
+                    <button
+                      className="text-blue-500 underline"
+                      onClick={() => handleReceipt(p.receiptUrl)}
+                    >
+                      보기
+                    </button>
                   </td>
                 </tr>
               ))
