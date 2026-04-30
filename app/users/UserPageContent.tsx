@@ -210,7 +210,7 @@ const {page, size, moveToList} = useCustomMove();
           <Table sx={{ minWidth: 1200 }} aria-label="Member Table">
             <TableHead>
               <TableRow>
-                {['ID', '권한', '이름', '이메일', '매장명', '주소', '전화번호', '소셜회원', '비밀번호', '차단'].map((title) => (
+                {['매장아이디','ID', '권한', '이름', '이메일', '매장명', '주소', '전화번호', '소셜회원', '비밀번호', '차단'].map((title) => (
                   <TableCell key={title} align="center" sx={{ fontWeight: 'bold' }}>
                     {title}
                   </TableCell>
@@ -220,6 +220,7 @@ const {page, size, moveToList} = useCustomMove();
             <TableBody>
               {members?.dtoList?.map((member: Member) => (
                 <TableRow key={member.id}>
+                  <TableCell align="center">{member.storeId}</TableCell>
                   <TableCell align="center">{member.id}</TableCell>
                   <TableCell align="center">
                     {member.roleList?.map((role) => {

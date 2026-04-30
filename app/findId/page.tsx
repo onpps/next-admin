@@ -121,7 +121,7 @@ export default function FindIdPage() {
           </Link>
           <span className="text-gray-600 text-xs">|</span>
           <Link href="/findPassword" className="hover:text-white transition">
-            비밀번호 변경
+            비밀번호 찾기
           </Link>
         </div>
       </div>

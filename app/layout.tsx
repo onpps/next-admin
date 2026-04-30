@@ -8,14 +8,16 @@ import "./globals.css";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isVideoPage = pathname.startsWith("/video");
 
   const isPlayerPage = pathname.startsWith("/player");
 
-  console.log("pathname=>" + pathname);
-  console.log("isVideoPage=>" + isVideoPage);
+  // LogoutButton 숨길 경로들
+  const hideLogoutPaths = ["/agree", "/register", "/findId", "/findPassword"];
+  const hideLogout = hideLogoutPaths.includes(pathname);
 
-  // 유튜브 플레이어 페이지는 완전 빈 레이아웃
+  console.log("pathname=>" + pathname);
+
+  // 플레이어 페이지는 완전 빈 레이아웃
   if (isPlayerPage) {
     return (
       <html lang="ko">
@@ -31,12 +33,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <body className="flex w-full h-screen overflow-hidden">
         <AppProviders>
           <ConditionalSidebar />
-            <main className="flex-1 h-screen overflow-y-auto p-6 bg-gray-900">
+          <main className="flex-1 h-screen overflow-y-auto p-6 bg-gray-900">
+            
+            {/* 조건부 렌더링 */}
+            {!hideLogout && (
               <div className="absolute top-4 right-6 z-50">
                 <LogoutButton />
               </div>
-              {children}
-            </main>
+            )}
+
+            {children}
+          </main>
         </AppProviders>
       </body>
     </html>
