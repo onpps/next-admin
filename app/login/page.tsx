@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { sweetToast } from "@/utils/sweetAlert";
 import { doLogin } from "@/api/LoginApi";
@@ -26,8 +27,9 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!loginParam.id || !loginParam.password) {
-      sweetToast("이메일과 비밀번호를 모두 입력하세요.");
+      sweetToast("아이디와 비밀번호를 모두 입력하세요.");
       return;
     }
 
@@ -41,6 +43,11 @@ export default function LoginPage() {
         return;
       }
 
+      if (data.error) {
+        sweetToast(data.message || "로그인 정보가 올바르지 않습니다.");
+        return;
+      }
+
       const roleNames = data.roleNames || [];
       if (roleNames.length === 1 && roleNames[0] === "USER") {
         sweetToast("로그인 권한이 없습니다.");
@@ -50,12 +57,24 @@ export default function LoginPage() {
       dispatch(loginSuccess(data));
       sweetToast("로그인 성공");
       router.push("/");
-    } catch (error) {
+
+    } catch (error: unknown) {
       console.log(error);
-      sweetToast("로그인 중 오류가 발생했습니다.");
+
+      let serverMsg = "";
+
+      if (error instanceof AxiosError) {
+        serverMsg = error.response?.data?.message || error.response?.data || "";
+      }
+
+      if (serverMsg.includes("자격 증명에 실패")) {
+        sweetToast("로그인 정보가 올바르지 않습니다.");
+      } else {
+        sweetToast(serverMsg || "로그인 중 오류가 발생했습니다.");
+      }
     }
   };
-
+  
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
       <div className="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-sm">

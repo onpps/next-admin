@@ -50,3 +50,15 @@ export const changePassword = async (param: passwordParam): Promise<configRespon
   }
 };
 
+export const deleteAccount = async (password: string, reason: string) => {
+  try {
+    const res = await jwtAxios.post(`${host}/deleteAccount`, {
+      password,
+      reason,
+    });
+    return res.data;
+  } catch (error) {
+    console.error('deleteAccount error:', error);
+    throw error;
+  }
+};

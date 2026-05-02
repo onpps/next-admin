@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AxiosError } from "axios";
 import {
   Box,
   Typography,
@@ -18,10 +19,16 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { getConfig, saveConfig, changePassword } from "@/api/configApi";
+import { getConfig, saveConfig, changePassword, deleteAccount } from "@/api/configApi";
+import { useRouter } from "next/navigation"; // 추가
+
 
 /* 설정 타입 명확히 정의 */
 interface StoreSettings {
@@ -29,6 +36,15 @@ interface StoreSettings {
 }
 
 export default function ConfigPageContent() {
+
+  const router = useRouter(); // 추가
+
+  const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false); // 추가
+
+  const [withdrawPassword, setWithdrawPassword] = useState(""); // 비밀번호 확인용
+  const [withdrawReasonType, setWithdrawReasonType] = useState("");
+  const [withdrawReasonEtc, setWithdrawReasonEtc] = useState("");
+
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState(""); // 메시지 상태 추가
@@ -163,6 +179,46 @@ export default function ConfigPageContent() {
     }
  };
 
+ const getFinalReason = () => {
+  if (withdrawReasonType === "기타") {
+    return withdrawReasonEtc;
+  }
+  return withdrawReasonType;
+};
+
+ const handleWithdraw = async () => {
+  if (!withdrawPassword) {
+    setError(true);
+    setSnackbarMessage("비밀번호를 입력하세요.");
+    setOpen(true);
+    return;
+  }
+
+  const finalReason = getFinalReason();
+
+  try {
+    await deleteAccount(withdrawPassword, finalReason);
+
+    setError(false);
+    setSnackbarMessage("회원탈퇴가 완료되었습니다.");
+    setOpen(true);
+
+    router.push("/login");
+
+  } catch (e: unknown) {
+    setError(true);
+
+    let serverMsg = "회원탈퇴 중 오류가 발생했습니다.";
+
+    if (e instanceof AxiosError) {
+      serverMsg = e.response?.data?.message || e.response?.data || serverMsg;
+    }
+
+    setSnackbarMessage(serverMsg);
+    setOpen(true);
+  }
+};
+
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -243,6 +299,35 @@ export default function ConfigPageContent() {
         </Grid>
 
         <Grid size={12}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                계정 관리
+              </Typography>
+
+              <Divider sx={{ mb: 3 }} />
+
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Typography color="error">회원탈퇴</Typography>
+
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  onClick={() => setWithdrawDialogOpen(true)}
+                >
+                  탈퇴하기
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid size={12}>
           <Box display="flex" justifyContent="flex-end">
             <Button variant="contained" size="large" onClick={handleSave}>
               설정 저장
@@ -252,71 +337,136 @@ export default function ConfigPageContent() {
       </Grid>
 
       <Dialog
-          open={passwordDialogOpen}
-          onClose={() => setPasswordDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle>비밀번호 변경</DialogTitle>
+        open={passwordDialogOpen}
+        onClose={() => setPasswordDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>비밀번호 변경</DialogTitle>
 
-          <DialogContent>
-
-           <TextField
-              fullWidth
-              margin="normal"
-              type="password"
-              label="현재 비밀번호"
-              value={passwordForm.currentPassword}
-              error={!!passwordError.currentPassword}
-              helperText={passwordError.currentPassword}
-              onChange={(e) =>
-                handlePasswordChange("currentPassword", e.target.value)
-              }
-            />
-
-            <TextField
-              fullWidth
-              margin="normal"
-              type="password"
-              label="새 비밀번호"
-              value={passwordForm.newPassword}
-              error={!!passwordError.newPassword}
-              helperText={passwordError.newPassword}
-              onChange={(e) =>
-                handlePasswordChange("newPassword", e.target.value)
-              }
-            />
+        <DialogContent>
 
           <TextField
             fullWidth
             margin="normal"
             type="password"
-            label="새 비밀번호 확인"
-            value={passwordForm.confirmPassword}
-            error={!!passwordError.confirmPassword}
-            helperText={passwordError.confirmPassword}
+            label="현재 비밀번호"
+            value={passwordForm.currentPassword}
+            error={!!passwordError.currentPassword}
+            helperText={passwordError.currentPassword}
             onChange={(e) =>
-              handlePasswordChange("confirmPassword", e.target.value)
+              handlePasswordChange("currentPassword", e.target.value)
             }
           />
 
-          </DialogContent>
+          <TextField
+            fullWidth
+            margin="normal"
+            type="password"
+            label="새 비밀번호"
+            value={passwordForm.newPassword}
+            error={!!passwordError.newPassword}
+            helperText={passwordError.newPassword}
+            onChange={(e) =>
+              handlePasswordChange("newPassword", e.target.value)
+            }
+          />
 
-          <DialogActions>
+        <TextField
+          fullWidth
+          margin="normal"
+          type="password"
+          label="새 비밀번호 확인"
+          value={passwordForm.confirmPassword}
+          error={!!passwordError.confirmPassword}
+          helperText={passwordError.confirmPassword}
+          onChange={(e) =>
+            handlePasswordChange("confirmPassword", e.target.value)
+          }
+        />
 
-            <Button onClick={() => setPasswordDialogOpen(false)}>
-              취소
-            </Button>
+        </DialogContent>
 
-            <Button
-              variant="contained"
-              onClick={handlePasswordUpdate}
+        <DialogActions>
+
+          <Button onClick={() => setPasswordDialogOpen(false)}>
+            취소
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handlePasswordUpdate}
+          >
+            변경
+          </Button>
+
+        </DialogActions>
+      </Dialog>
+        
+      <Dialog
+        open={withdrawDialogOpen}
+        onClose={() => setWithdrawDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>회원탈퇴</DialogTitle>
+
+        <DialogContent>
+
+          <Typography color="error" sx={{ mb: 2 }}>
+            탈퇴 시 모든 데이터는 복구할 수 없습니다.
+          </Typography>
+
+          <TextField
+            fullWidth
+            type="password"
+            label="비밀번호 확인"
+            value={withdrawPassword}
+            onChange={(e) => setWithdrawPassword(e.target.value)}
+          />
+
+          {/* 🔥 탈퇴 사유 */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>탈퇴 사유</InputLabel>
+            <Select
+              value={withdrawReasonType}
+              label="탈퇴 사유"
+              onChange={(e) => setWithdrawReasonType(e.target.value)}
             >
-              변경
-            </Button>
+              <MenuItem value="서비스가 불편함">서비스가 불편함</MenuItem>
+              <MenuItem value="가격이 비쌈">가격이 비쌈</MenuItem>
+              <MenuItem value="기능 부족">기능 부족</MenuItem>
+              <MenuItem value="사용 빈도 낮음">사용 빈도 낮음</MenuItem>
+              <MenuItem value="기타">기타</MenuItem>
+            </Select>
+          </FormControl>
 
-          </DialogActions>
-        </Dialog>
+          {withdrawReasonType === "기타" && (
+            <TextField
+              fullWidth
+              margin="normal"
+              label="탈퇴 사유 입력"
+              value={withdrawReasonEtc}
+              onChange={(e) => setWithdrawReasonEtc(e.target.value)}
+            />
+          )}
+
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setWithdrawDialogOpen(false)}>
+            취소
+          </Button>
+
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleWithdraw}
+          >
+            탈퇴하기
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={open}
