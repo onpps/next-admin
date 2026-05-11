@@ -441,7 +441,7 @@ export default function DefaultPageContent() {
       <Box display="flex" gap={1} mb={2}>
         <TextField
           fullWidth
-          placeholder="URL 또는 검색어 입력"
+          placeholder="검색어 입력"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           sx={{

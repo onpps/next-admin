@@ -8,7 +8,7 @@ import useCustomMove from "@/utils/useCustomMove";
 import DeviceRegisterModal from '@/components/DeviceRegisterModal';
 //import PasswordChangeForm from "@/components/PasswordChangeForm";
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Tooltip } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Tooltip } from '@mui/material';
 import CustomStepper from "@/components/CustomStepper";
 import { getDeviceList, startDevice, stopDevice, changeNumberOfSongLimit, resetNumberOfSongRequests, unpairDevice } from '@/api/deviceApi';
 import { Device } from '@/types/Device';
@@ -31,14 +31,12 @@ export default function UsersPageContent() {
   const [devices, setDevices] = useState<Device[]>();
 
   const loadDeviceList = useCallback(async () => {
-    try {
-      const data = await getDeviceList({ page, size });
-      setDevices(data);
-    } catch (error) {
-      console.log("단말기 데이터를 불러오는 중 에러 발생:", error);
-      alert("서버 통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-    }
-  }, [page, size]); 
+
+    const data = await getDeviceList({ page, size });
+
+    setDevices(data);
+
+  }, [page, size]);
 
   const handleStop = (deviceId: string, storeId: string) => {
     sweetConfirm(`단말기를 차단 하시겠습니까?`, 'question', async () => {

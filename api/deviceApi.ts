@@ -1,5 +1,8 @@
+import axios from "axios";
+
 import jwtAxios from "../utils/jwtUtil";
 import { Device } from "@/types/Device";
+import { sweetToast } from '@/utils/sweetAlert'; 
 //import { API_SERVER_HOST } from "@/utils/config";
 
 export const API_SERVER_HOST = process.env.NEXT_PUBLIC_API_SERVER_HOST;
@@ -38,18 +41,44 @@ interface limitParam {
 export async function getDeviceList(params: PageParam): Promise<Device[]> {
   try {
 
-    const response = await jwtAxios.get(`${host}/list`, {params: params});
-
-    console.log("response=>" + JSON.stringify(response));
-
-    // 서버가 JSON 형식의 배열을 반환한다고 가정
-    // const data: Music[] = response.data;
-
+    const response = await jwtAxios.get(`${host}/list`, { params });
     return response.data as Device[];
 
   } catch (error) {
-    console.error("디바이스 내역을 불러오는 중 오류 발생:", error);
-    return []; // 오류 발생 시 빈 배열 반환
+
+    // Axios 에러 처리
+    if (axios.isAxiosError(error)) {
+
+      const status = error.response?.status;
+      const message = error.response?.data?.message;
+
+      console.log("status =>", status);
+      console.log("message =>", message);
+
+      // 403 : 구독 만료
+      if (status === 403) {
+        sweetToast(message || "구독이 만료되었습니다.");
+
+        window.location.href = "/purchase";
+
+        return [];
+      }
+
+      // 401 : 로그인 필요
+      if (status === 401) {
+        //alert(message || "로그인이 필요합니다.");
+        sweetToast(message || "로그인이 필요합니다.");
+
+        window.location.href = "/login";
+
+        return [];
+      }
+    }
+
+    // 진짜 서버 오류
+    console.log("디바이스 내역 조회 실패");
+
+    return [];
   }
 }
 
