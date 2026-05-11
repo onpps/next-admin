@@ -8,7 +8,7 @@ import useCustomMove from "@/utils/useCustomMove";
 import DeviceRegisterModal from '@/components/DeviceRegisterModal';
 //import PasswordChangeForm from "@/components/PasswordChangeForm";
 import { sweetAlert, sweetConfirm, sweetToast } from '@/utils/sweetAlert';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Tooltip } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Tooltip } from '@mui/material';
 import CustomStepper from "@/components/CustomStepper";
 import { getDeviceList, startDevice, stopDevice, changeNumberOfSongLimit, resetNumberOfSongRequests, unpairDevice } from '@/api/deviceApi';
 import { Device } from '@/types/Device';
